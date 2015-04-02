@@ -1,0 +1,8 @@
+<handler-chains xmlns="http://java.sun.com/xml/ns/javaee">
+    <handler-chain>
+       <handler>
+           <handler-name>HeaderHandler</handler-name>
+           <handler-class>fi.vm.kapa.rova.soap.handlers.SoapHeaderCopyHandler</handler-class>
+       </handler>
+    </handler-chain>
+</handler-chains>
