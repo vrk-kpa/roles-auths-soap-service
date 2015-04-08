@@ -6,7 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.ws.Holder;
+
 import fi.vm.kapa.xml.rova.api.AuthorizationType;
+import fi.vm.kapa.xml.rova.api.DecisionReasonType;
 import fi.vm.kapa.xml.rova.api.ObjectFactory;
 import fi.vm.kapa.xml.rova.api.Principal;
 import fi.vm.kapa.xml.rova.api.PrincipalType;
@@ -29,8 +32,9 @@ public class DevDataProvider implements DataProvider {
 		populatePrincipalData();
 		populateAuthorizationData();
 	}
+	
 	public AuthorizationType getAuthorizationTypeResponse(String hetu,
-			String target, String industry, String service, String issue, String endUserId) {
+			String target, String industry, String service, String issue, String endUserId, Holder<List<DecisionReasonType>> reason) {
 	
 		List<String> currentAuth = authorizationData.get(hetu);
 		if (currentAuth != null && currentAuth.contains(target)) {
@@ -40,7 +44,7 @@ public class DevDataProvider implements DataProvider {
 		}
 	}
 	public Principal getPrincipalResponse(String hetu, String industry,
-			String service, String issue, String endUserId) {
+			String service, String issue, String endUserId, Holder<List<DecisionReasonType>> reason) {
 		if (principalData.containsKey(hetu)) {
 			PrincipalItem item = principalData.get(hetu);
 			Principal principal = factory.createPrincipal();
