@@ -20,6 +20,7 @@ import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.model.Authorization;
 import fi.vm.kapa.rova.engine.model.Delegate;
 import fi.vm.kapa.rova.engine.resources.EngineResource;
+import fi.vm.kapa.rova.rest.validation.ValidationClientRequestFilter;
 import fi.vm.kapa.xml.rova.api.AuthorizationType;
 import fi.vm.kapa.xml.rova.api.ObjectFactory;
 import fi.vm.kapa.xml.rova.api.Principal;
@@ -34,6 +35,9 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 	@Value(ENGINE_URL)
 	private String engineUrl;
 
+	@Value(ENGINE_API_KEY)
+	private String engineApiKey;
+
 	@PostConstruct
 	public void init(){
 		ClientConfig cc = new ClientConfig().register(JacksonFeature.class);
@@ -45,7 +49,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 	public AuthorizationType getAuthorizationTypeResponse(String delegateId,
 			String principalId, String industry, String service, String issue, String endUserId) {
 		WebTarget webTarget = getClient().target(
-				engineUrl + "authorization" + "/" + delegateId +"/"+ principalId + "?service=" + service);
+				engineUrl + "authorization" + "/" + service + "/"  +endUserId 
+					+ "/" + delegateId +"/"+ principalId);
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
 		Authorization auth = response.readEntity(Authorization.class);
@@ -58,7 +63,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 	public Principal getPrincipalResponse(String personId, String industry,
 			String service, String issue, String endUserId) {
 		WebTarget webTarget = getClient().target(
-				engineUrl + "delegate" + "/" + personId + "?service=" + service);
+				engineUrl + "delegate" + "/" + service + "/"  +endUserId 
+				+"/"+ personId + "/" + endUserId);
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
 		Delegate delegate = response.readEntity(Delegate.class);
@@ -78,6 +84,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		ClientConfig clientConfig = new ClientConfig();
 		Client client = ClientBuilder.newClient(clientConfig);
 		client.register(JacksonFeature.class);
+		client.register(new ValidationClientRequestFilter(engineApiKey));
 		return client;
 	}
 	
