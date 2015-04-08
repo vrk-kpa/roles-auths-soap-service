@@ -29,7 +29,6 @@ import fi.vm.kapa.xml.rova.api.RovaPortType;
 @HandlerChain(file = "./handlers.xml")
 @Component("rovaService")
 public class RovaApi extends SpringBeanAutowiringSupport implements RovaPortType {
-
 	Logger LOG = Logger.getLogger(RovaApi.class.toString());
 	
 	@Resource
@@ -61,20 +60,20 @@ public class RovaApi extends SpringBeanAutowiringSupport implements RovaPortType
 		rovaServiceRequest.value.setService(service);
 		rovaServiceRequest.value.setEndUserIdentifier(endUserIdentifier);
 		if (delegateIdentifier != null && principalIdentifier == null) {
-			principalResponse.value = getPrincipalResponse(delegateIdentifier, service);
+			principalResponse.value = getPrincipalResponse(delegateIdentifier, service, reason);
 		} else if (principalIdentifier != null) {
-			delegationResponse.value = getAuthResponse(delegateIdentifier, principalIdentifier, service);
+			delegationResponse.value = getAuthResponse(delegateIdentifier, principalIdentifier, service, reason);
 		}
 	}
 	
-	private Principal getPrincipalResponse(String hetu, String service) {
-		Principal p = dataProvider.getPrincipalResponse(hetu, null, service, null, null);
+	private Principal getPrincipalResponse(String hetu, String service, Holder<List<DecisionReasonType>> reason) {
+		Principal p = dataProvider.getPrincipalResponse(hetu, null, service, null, null, reason);
 //		LOG.info("response="+ p);
 		return p;
 	}
 
-	private AuthorizationType getAuthResponse(String hetu, String target, String service) {
-		AuthorizationType response = dataProvider.getAuthorizationTypeResponse(hetu, target, null, service, null, null);
+	private AuthorizationType getAuthResponse(String hetu, String target, String service, Holder<List<DecisionReasonType>> reason) {
+		AuthorizationType response = dataProvider.getAuthorizationTypeResponse(hetu, target, null, service, null, null, reason);
 //		LOG.info("response="+ response.value());
 		return response;
 	}
