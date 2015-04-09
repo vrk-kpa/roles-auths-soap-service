@@ -1,9 +1,7 @@
 package fi.vm.kapa.rova.soap.providers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
@@ -21,11 +19,9 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import fi.vm.kapa.rova.config.SpringProperties;
+import fi.vm.kapa.rova.engine.model.Authorization;
+import fi.vm.kapa.rova.engine.model.DecisionReason;
 import fi.vm.kapa.rova.engine.model.Delegate;
 import fi.vm.kapa.rova.engine.resources.EngineResource;
 import fi.vm.kapa.rova.rest.validation.ValidationClientRequestFilter;
@@ -41,7 +37,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
 	EngineResource engineResource = null;
 	private ObjectFactory factory = new ObjectFactory();
-	private ObjectMapper mapper = new ObjectMapper();
 	
 	@Value(ENGINE_URL)
 	private String engineUrl;
@@ -59,8 +54,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		Client resource = ClientBuilder.newClient(cc);
 		engineResource = WebResourceFactory.newResource(EngineResource.class,
 				resource.target(engineUrl));
-		mapper.configure(JsonGenerator.Feature.QUOTE_FIELD_NAMES, false);
-		mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 	}
 	
 	public AuthorizationType getAuthorizationTypeResponse(String delegateId,
@@ -71,20 +64,12 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 					+ "/" + delegateId +"/"+ principalId);
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
-//		Authorization auth = response.readEntity(Authorization.class);
-		@SuppressWarnings("rawtypes")
-		Map responseMap = response.readEntity(Map.class);
-		
-//		AuthorizationType result = AuthorizationType.fromValue(auth.getResult().toString());
-		// haetaan ja konvertoidaan authorization map-entrystä  
-		AuthorizationType result = AuthorizationType.fromValue(responseMap.get("result").toString());
-		
-		// haetaan enginen palauttamat syyt ja lisätään holderiin
-		List reasons = (List)responseMap.get("reason");
-		LOG.info("reasons: "+ (reasons == null ? "null" : reasons.size()));
+		Authorization auth = response.readEntity(Authorization.class);
+
+		AuthorizationType result = AuthorizationType.fromValue(auth.getResult().toString());
 
 		if (service.endsWith("-r")) {
-			addReasons(responseMap, reason); // TODO lisäämislogiikka industry/service/issue/endUserId-perusteella
+			addReasons(auth.getReasons(), reason);
 		}
 		
 		return result;
@@ -97,42 +82,19 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 				+"/"+ personId + "/" + endUserId);
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
-//		Delegate delegate = response.readEntity(Delegate.class);
-		@SuppressWarnings("rawtypes")
-		Map responseMap = response.readEntity(Map.class);
+		Delegate delegate = response.readEntity(Delegate.class);
 
-		// haetaan ja konvertoidaan delegate map-entrystä  
-		Object resultObj = responseMap.get("result");
-		Delegate delegate = null;
-		try {
-			if (resultObj != null) {
-				String resp = resultObj.toString();
-				resp = resp.replaceAll("[^\\{\\[\\]\\},=]+", "\"$0\""); // lisätään lainausmerkit kaikkien kenttien ja arvojen ympärille
-				resp = resp.replaceAll("\" ", "\""); // poistetaan ylimääräinen välilyönti kenttien alusta
-				resp = resp.replaceAll("\"\"", ""); // poistetaan tyhjät lainausmerkit
-				resp = resp.replaceAll("=", ":"); // korvataan sijoitus (=) kaksoispisteellä (:)
-				delegate = mapper.readValue(resp, Delegate.class);
-			}
-		} catch (IOException e) {
-			LOG.severe("delegate conversion failed: "+ e.getMessage());
+		if (service.endsWith("-r")) {
+			addReasons(delegate.getReasons(), reason);
 		}
 		
-		List reasons = (List)responseMap.get("reason");
-		LOG.info("reasons: "+ (reasons == null ? "null" : reasons.size()));
-		// haetaan enginen palauttamat syyt ja lisätään holderiin
-		if (service.endsWith("-r")) {
-			addReasons(responseMap, reason); // TODO lisäämislogiikka industry/service/issue/endUserId-perusteella
-		}
-
 		Principal principal = factory.createPrincipal();
-		if (delegate != null) {
-			List<PrincipalType> principals = principal.getPrincipalElem();
-			for (fi.vm.kapa.rova.engine.model.Principal modelP : delegate.getPrincipal()) {
-				PrincipalType current = factory.createPrincipalType();
-				current.setTargetIdentifier(modelP.getPersonId());
-				current.setTargetName(modelP.getName());
-				principals.add(current);
-			}
+		List<PrincipalType> principals = principal.getPrincipalElem();
+		for (fi.vm.kapa.rova.engine.model.Principal modelP : delegate.getPrincipal()) {
+			PrincipalType current = factory.createPrincipalType();
+			current.setTargetIdentifier(modelP.getPersonId());
+			current.setTargetName(modelP.getName());
+			principals.add(current);
 		}
 		return principal;
 	}
@@ -145,18 +107,15 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		return client;
 	}
 	
-	@SuppressWarnings("rawtypes")
-	private void addReasons(Map reasonMap, Holder<List<DecisionReasonType>> reason) {
-		List reasons = (List)reasonMap.get("reason");
+	private void addReasons(List<DecisionReason> reasons, Holder<List<DecisionReasonType>> reason) {
 		if (reasons != null) {
 			if (reason.value == null) {
 				reason.value = new ArrayList<DecisionReasonType>();
 			}
-			for (Object object : reasons) {
-				Map mapObj = (Map)object;
+			for (DecisionReason dr : reasons) {
 				DecisionReasonType drt = new DecisionReasonType();
-				drt.setReasonRule((String)mapObj.get("reasonRule"));
-				drt.setReasonValue((String)mapObj.get("reasonValue"));
+				drt.setReasonRule(dr.getReasonRule());
+				drt.setReasonValue(dr.getReasonValue());
 				reason.value.add(drt);
 			}
 		}
