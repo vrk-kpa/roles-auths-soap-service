@@ -76,7 +76,12 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		AuthorizationType result = AuthorizationType.fromValue(responseMap.get("result").toString());
 		
 		// haetaan enginen palauttamat syyt ja lisätään holderiin
-		addReasons(responseMap, reason); // TODO lisäämislogiikka industry/service/issue/endUserId-perusteella
+		List reasons = (List)responseMap.get("reason");
+		LOG.info("reasons: "+ (reasons == null ? "null" : reasons.size()));
+
+		if (service.endsWith("-r")) {
+			addReasons(responseMap, reason); // TODO lisäämislogiikka industry/service/issue/endUserId-perusteella
+		}
 		
 		return result;
 	}
@@ -108,8 +113,12 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 			LOG.severe("delegate conversion failed: "+ e.getMessage());
 		}
 		
+		List reasons = (List)responseMap.get("reason");
+		LOG.info("reasons: "+ (reasons == null ? "null" : reasons.size()));
 		// haetaan enginen palauttamat syyt ja lisätään holderiin
-		addReasons(responseMap, reason); // TODO lisäämislogiikka industry/service/issue/endUserId-perusteella
+		if (service.endsWith("-r")) {
+			addReasons(responseMap, reason); // TODO lisäämislogiikka industry/service/issue/endUserId-perusteella
+		}
 
 		Principal principal = factory.createPrincipal();
 		if (delegate != null) {
