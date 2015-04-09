@@ -49,6 +49,10 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 	@Value(ENGINE_API_KEY)
 	private String engineApiKey;
 
+	@Value(REQUEST_ALIVE_SECONDS)
+	Integer requestAliveSeconds;
+	
+	
 	@PostConstruct
 	public void init(){
 		ClientConfig cc = new ClientConfig().register(JacksonFeature.class);
@@ -137,7 +141,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		ClientConfig clientConfig = new ClientConfig();
 		Client client = ClientBuilder.newClient(clientConfig);
 		client.register(JacksonFeature.class);
-		client.register(new ValidationClientRequestFilter(engineApiKey));
+		client.register(new ValidationClientRequestFilter(engineApiKey, requestAliveSeconds));
 		return client;
 	}
 	
