@@ -68,7 +68,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
 		AuthorizationType result = AuthorizationType.fromValue(auth.getResult().toString());
 
-		if (service.endsWith("-r")) {
+		if (auth.getReasons() != null) {
 			addReasons(auth.getReasons(), reason);
 		}
 		
@@ -84,7 +84,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		Response response = invocationBuilder.get();
 		Delegate delegate = response.readEntity(Delegate.class);
 
-		if (service.endsWith("-r")) {
+		if (delegate.getReasons() != null) {
 			addReasons(delegate.getReasons(), reason);
 		}
 		
