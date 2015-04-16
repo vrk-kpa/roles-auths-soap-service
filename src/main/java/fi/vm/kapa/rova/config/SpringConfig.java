@@ -9,7 +9,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @Configuration
 @PropertySources(value =  {@PropertySource("classpath:application.properties"),
 		@PropertySource(value="classpath:developer.properties", ignoreResourceNotFound=true), 
-		@PropertySource(value="file:/opt/www/roles-auths-soap-service/config/application.properties", ignoreResourceNotFound=true)})
+		@PropertySource(value="file:/opt/www/roles-auths-soap-service/config/service.properties", ignoreResourceNotFound=true)})
 public class SpringConfig {
 
 	@Bean
