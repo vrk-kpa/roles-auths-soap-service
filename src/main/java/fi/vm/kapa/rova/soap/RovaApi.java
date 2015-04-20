@@ -1,19 +1,16 @@
 package fi.vm.kapa.rova.soap;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import fi.vm.kapa.rova.soap.providers.DataProvider;
@@ -21,12 +18,10 @@ import fi.vm.kapa.xml.rova.api.AuthorizationType;
 import fi.vm.kapa.xml.rova.api.DecisionReasonType;
 import fi.vm.kapa.xml.rova.api.ObjectFactory;
 import fi.vm.kapa.xml.rova.api.Principal;
-import fi.vm.kapa.xml.rova.api.PrincipalType;
 import fi.vm.kapa.xml.rova.api.Request;
 import fi.vm.kapa.xml.rova.api.RovaPortType;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.RovaPortType")
-@HandlerChain(file = "./handlers.xml")
 @Component("rovaService")
 public class RovaApi extends SpringBeanAutowiringSupport implements RovaPortType {
 	Logger LOG = Logger.getLogger(RovaApi.class.toString());

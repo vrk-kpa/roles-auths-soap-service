@@ -18,6 +18,7 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import org.springframework.stereotype.Component;
 
+@Component("xroadHeaderHandler")
 public class SoapHeaderCopyHandler implements SOAPHandler<SOAPMessageContext> {
 	public Set<QName> getHeaders() {
 		return Collections.emptySet();
