@@ -59,9 +59,19 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 	public AuthorizationType getAuthorizationTypeResponse(String delegateId,
 			String principalId, String industry, String service, String issue, 
 			String endUserId, Holder<List<DecisionReasonType>> reason) {
-		WebTarget webTarget = getClient().target(
-				engineUrl + "authorization" + "/" + service + "/"  +endUserId 
-					+ "/" + delegateId +"/"+ principalId);
+		
+		WebTarget webTarget = null;
+		
+		if (issue != null) {
+			webTarget = getClient().target(
+					engineUrl + "authorization" + "/" + service + "/"  +endUserId 
+						+ "/" + delegateId +"/"+ principalId + "/" + issue);
+		} else {
+			webTarget = getClient().target(
+					engineUrl + "authorization" + "/" + service + "/"  +endUserId 
+						+ "/" + delegateId +"/"+ principalId);
+		}
+		
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
 		Authorization auth = response.readEntity(Authorization.class);
@@ -77,9 +87,17 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
 	public Principal getPrincipalResponse(String personId, String industry,
 			String service, String issue, String endUserId, Holder<List<DecisionReasonType>> reason) {
-		WebTarget webTarget = getClient().target(
-				engineUrl + "delegate" + "/" + service + "/"  +endUserId 
-				+"/"+ personId + "/" + endUserId);
+		
+		WebTarget webTarget = null;
+		if (issue != null) {
+			webTarget = getClient().target(
+					engineUrl + "delegate" + "/" + service + "/"  +endUserId 
+					+"/"+ personId + "/" + issue);
+		} else {
+			webTarget = getClient().target(
+					engineUrl + "delegate" + "/" + service + "/"  +endUserId 
+					+"/"+ personId);
+		}
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
 		Delegate delegate = response.readEntity(Delegate.class);
