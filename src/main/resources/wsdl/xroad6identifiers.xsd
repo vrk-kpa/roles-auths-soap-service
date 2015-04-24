@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified" targetNamespace="http://x-road.eu/xsd/identifiers"
+	xmlns="http://x-road.eu/xsd/identifiers">
+	<xsd:complexType name="SdsbIdentifierType">
+		<xsd:annotation>
+			<xsd:documentation>Globally unique identifier in the
+				SDSB system.
+				Identifier consists of object type
+				specifier and list of
+				hierarchical codes
+				(starting with code that identifiers the SDSB
+				instance).
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element minOccurs="0" ref="sdsbInstance" />
+			<xsd:element minOccurs="0" ref="memberClass" />
+			<xsd:element minOccurs="0" ref="memberCode" />
+			<xsd:element minOccurs="0" ref="subsystemCode" />
+			<xsd:element minOccurs="0" ref="serverCode" />
+			<xsd:element minOccurs="0" ref="serviceCode" />
+			<xsd:element minOccurs="0" ref="serviceVersion" />
+		</xsd:sequence>
+		<xsd:attribute ref="objectType" use="required" />
+	</xsd:complexType>
+	<xsd:simpleType name="SdsbObjectType">
+		<xsd:annotation>
+			<xsd:documentation>Enumeration for SDSB identifier
+				types that can be
+				used in requests.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="MEMBER" />
+			<xsd:enumeration value="SUBSYSTEM" />
+			<xsd:enumeration value="SERVER" />
+			<xsd:enumeration value="SERVICE" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:element name="sdsbInstance" type="xsd:string">
+		<xsd:annotation>
+			<xsd:documentation>Identifies the SDSB instance.
+				This field is
+				applicable to all identifier
+				types.
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="memberClass" type="xsd:string">
+		<xsd:annotation>
+			<xsd:documentation>Type of the member (company,
+				government
+				institution, private person, etc.)
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="memberCode" type="xsd:string">
+		<xsd:annotation>
+			<xsd:documentation>Code that uniquely identifies a
+				member of given
+				member type.
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="subsystemCode" type="xsd:string">
+		<xsd:annotation>
+			<xsd:documentation>Code that uniquely identifies a
+				subsystem of
+				given
+				SDSB member.
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="serviceCode" type="xsd:string">
+		<xsd:annotation>
+			<xsd:documentation>Code that uniquely identifies a
+				service offered
+				by
+				given SDSB member or
+				subsystem.
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="serviceVersion" type="xsd:string">
+		<xsd:annotation>
+			<xsd:documentation>Version of the service.
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:element name="serverCode" type="xsd:string">
+		<xsd:annotation>
+			<xsd:documentation>Code that uniquely identifies
+				security server
+				offered by a given SDSB member
+				or subsystem.
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+	<xsd:attribute name="objectType" type="SdsbObjectType" />
+	<xsd:complexType name="SdsbClientIdentifierType">
+		<xsd:complexContent>
+			<xsd:restriction base="SdsbIdentifierType">
+				<xsd:sequence>
+					<xsd:element ref="sdsbInstance" />
+					<xsd:element ref="memberClass" />
+					<xsd:element ref="memberCode" />
+					<xsd:element minOccurs="0" ref="subsystemCode" />
+				</xsd:sequence>
+			</xsd:restriction>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="SdsbServiceIdentifierType">
+		<xsd:complexContent>
+			<xsd:restriction base="SdsbIdentifierType">
+				<xsd:sequence>
+					<xsd:element ref="sdsbInstance" />
+					<xsd:element ref="memberClass" />
+					<xsd:element ref="memberCode" />
+					<xsd:element minOccurs="0" ref="subsystemCode" />
+					<xsd:element ref="serviceCode" />
+					<xsd:element minOccurs="0" ref="serviceVersion" />
+				</xsd:sequence>
+			</xsd:restriction>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="SdsbSecurityServerIdentifierType">
+		<xsd:complexContent>
+			<xsd:restriction base="SdsbIdentifierType">
+				<xsd:sequence>
+					<xsd:element ref="sdsbInstance" />
+					<xsd:element ref="memberClass" />
+					<xsd:element ref="memberCode" />
+					<xsd:element ref="serverCode" />
+				</xsd:sequence>
+			</xsd:restriction>
+		</xsd:complexContent>
+	</xsd:complexType>
+</xsd:schema>
