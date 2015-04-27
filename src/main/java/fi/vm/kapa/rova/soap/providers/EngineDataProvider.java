@@ -25,19 +25,20 @@ import fi.vm.kapa.rova.engine.model.DecisionReason;
 import fi.vm.kapa.rova.engine.model.Delegate;
 import fi.vm.kapa.rova.engine.resources.EngineResource;
 import fi.vm.kapa.rova.rest.validation.ValidationClientRequestFilter;
-import fi.vm.kapa.xml.rova.api.AuthorizationType;
-import fi.vm.kapa.xml.rova.api.DecisionReasonType;
-import fi.vm.kapa.xml.rova.api.ObjectFactory;
-import fi.vm.kapa.xml.rova.api.Principal;
-import fi.vm.kapa.xml.rova.api.PrincipalType;
+import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
+import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
+import fi.vm.kapa.xml.rova.api.delegate.AuthorizationResponseType;
+import fi.vm.kapa.xml.rova.api.delegate.Principal;
+import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
 	Logger LOG = Logger.getLogger(EngineDataProvider.class.toString());
 
 	EngineResource engineResource = null;
-	private ObjectFactory factory = new ObjectFactory();
-	
+	private fi.vm.kapa.xml.rova.api.authorization.ObjectFactory authorizationFactory = new fi.vm.kapa.xml.rova.api.authorization.ObjectFactory();
+	private fi.vm.kapa.xml.rova.api.delegate.ObjectFactory delegateFactory = new fi.vm.kapa.xml.rova.api.delegate.ObjectFactory();
+
 	@Value(ENGINE_URL)
 	private String engineUrl;
 
@@ -46,85 +47,72 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
 	@Value(REQUEST_ALIVE_SECONDS)
 	private Integer requestAliveSeconds;
-	
+
 	@PostConstruct
-	public void init(){
+	public void init() {
 		ClientConfig cc = new ClientConfig().register(JacksonFeature.class);
 		Client resource = ClientBuilder.newClient(cc);
 		engineResource = WebResourceFactory.newResource(EngineResource.class,
 				resource.target(engineUrl));
 	}
-	
-	public AuthorizationType getAuthorizationTypeResponse(String delegateId,
-			String principalId, String industry, String service, String issue, 
-			String endUserId, Holder<List<DecisionReasonType>> reason) {
-		
-		WebTarget webTarget = null;
-		
-		if (issue != null) {
-			webTarget = getClient().target(
-					engineUrl + "authorization" + "/" + service + "/"  +endUserId 
-						+ "/" + delegateId +"/"+ principalId + "/" + issue);
-		} else {
-			webTarget = getClient().target(
-					engineUrl + "authorization" + "/" + service + "/"  +endUserId 
-						+ "/" + delegateId +"/"+ principalId);
-		}
-		
-		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+
+	public void handleAuthorizationTypeResponse(String delegateId,
+			String principalId, String service, String endUserId,
+			String requestId,
+			Holder<AuthorizationType> authorizationTypeResponse,
+			Holder<List<DecisionReasonType>> reason) {
+
+		WebTarget webTarget = getClient().target(
+				engineUrl + "authorization" + "/" + service + "/" + endUserId
+						+ "/" + delegateId + "/" + principalId);
+
+		Invocation.Builder invocationBuilder = webTarget
+				.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
 		Authorization auth = response.readEntity(Authorization.class);
 
-		AuthorizationType result = AuthorizationType.fromValue(auth.getResult().toString());
+		authorizationTypeResponse.value =   AuthorizationType.fromValue(auth.getResult().toString());
 
 		if (auth.getReasons() != null) {
 			addReasons(auth.getReasons(), reason);
 		}
-		
-		return result;
 	}
 
-	public Principal getPrincipalResponse(String personId, String industry,
-			String service, String issue, String endUserId, Holder<List<DecisionReasonType>> reason) {
-		
-		WebTarget webTarget = null;
-		if (issue != null) {
-			webTarget = getClient().target(
-					engineUrl + "delegate" + "/" + service + "/"  +endUserId 
-					+"/"+ personId + "/" + issue);
-		} else {
-			webTarget = getClient().target(
-					engineUrl + "delegate" + "/" + service + "/"  +endUserId 
-					+"/"+ personId);
-		}
-		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+	public void handlePrincipalResponse(String personId, String service,
+			String endUserId, String requestId, Holder<Principal> principal,
+			Holder<AuthorizationResponseType> authorizationResponseType) {
+
+		WebTarget webTarget = getClient().target(
+				engineUrl + "delegate" + "/" + service + "/" + endUserId + "/"
+						+ personId);
+
+		Invocation.Builder invocationBuilder = webTarget
+				.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
 		Delegate delegate = response.readEntity(Delegate.class);
 
-		if (delegate.getReasons() != null) {
-			addReasons(delegate.getReasons(), reason);
-		}
-		
-		Principal principal = factory.createPrincipal();
-		List<PrincipalType> principals = principal.getPrincipalElem();
+		List<PrincipalType> principals = principal.value.getPrincipalElem();
 		for (fi.vm.kapa.rova.engine.model.Principal modelP : delegate.getPrincipal()) {
-			PrincipalType current = factory.createPrincipalType();
+			PrincipalType current = delegateFactory.createPrincipalType();
 			current.setTargetIdentifier(modelP.getPersonId());
 			current.setTargetName(modelP.getName());
 			principals.add(current);
 		}
-		return principal;
+		
+		addAuthorizationType(delegate, authorizationResponseType);
 	}
 
 	private Client getClient() {
 		ClientConfig clientConfig = new ClientConfig();
 		Client client = ClientBuilder.newClient(clientConfig);
 		client.register(JacksonFeature.class);
-		client.register(new ValidationClientRequestFilter(engineApiKey, requestAliveSeconds, null));
+		client.register(new ValidationClientRequestFilter(engineApiKey,
+				requestAliveSeconds, null));
 		return client;
 	}
-	
-	private void addReasons(List<DecisionReason> reasons, Holder<List<DecisionReasonType>> reason) {
+
+	private void addReasons(List<DecisionReason> reasons,
+			Holder<List<DecisionReasonType>> reason) {
 		if (reasons != null) {
 			if (reason.value == null) {
 				reason.value = new ArrayList<DecisionReasonType>();
@@ -138,8 +126,30 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		}
 	}
 
+	private void addAuthorizationType(Delegate delegate,
+			Holder<AuthorizationResponseType> authorization) {
+		if (delegate.getAuthorizationType() != null) {
+			if (authorization.value == null) {
+				authorization.value = delegateFactory
+						.createAuthorizationResponseType();
+			}
+			fi.vm.kapa.xml.rova.api.delegate.AuthorizationType aType = fi.vm.kapa.xml.rova.api.delegate.AuthorizationType
+					.fromValue(delegate.getAuthorizationType().toString());
+			authorization.value.setAuthorizationResponse(aType);
+
+			List<DecisionReason> reasons = delegate.getReasons();
+			for (DecisionReason dr : reasons) {
+				fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType drt = new fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType();
+				drt.setReasonRule(dr.getReasonRule());
+				drt.setReasonValue(dr.getReasonValue());
+				authorization.value.getReason().add(drt);
+			}
+		}
+	}
+
 	@Override
 	public String toString() {
 		return "EngineDataProvider engine url: " + engineUrl;
 	}
+
 }

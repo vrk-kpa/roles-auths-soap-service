@@ -75,10 +75,10 @@
 			<artifactId>spring-web</artifactId>
 		</dependency>
 		<dependency>
-    <groupId>org.jvnet.jax-ws-commons.spring</groupId>
-    <artifactId>jaxws-spring</artifactId>
-    <version>1.9</version>
-</dependency>
+			<groupId>org.jvnet.jax-ws-commons.spring</groupId>
+			<artifactId>jaxws-spring</artifactId>
+			<version>1.9</version>
+		</dependency>
 		<dependency>
 			<groupId>org.jvnet.jax-ws-commons.spring</groupId>
 			<artifactId>jaxws-spring</artifactId>
@@ -88,18 +88,10 @@
 					<groupId>javax.servlet</groupId>
 					<artifactId>servlet-api</artifactId>
 				</exclusion>
-				<!-- exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-context</artifactId>
-				</exclusion -->
+				<!-- exclusion> <groupId>org.springframework</groupId> <artifactId>spring</artifactId> 
+					</exclusion> <exclusion> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId> 
+					</exclusion> <exclusion> <groupId>org.springframework</groupId> <artifactId>spring-context</artifactId> 
+					</exclusion -->
 			</exclusions>
 		</dependency>
 
@@ -210,19 +202,36 @@
 				<version>1.9</version>
 				<executions>
 					<execution>
+						<id>delegate</id>
+						<phase>generate-sources</phase>
 						<goals>
 							<goal>wsimport</goal>
 						</goals>
+						<configuration>
+							<XadditionalHeaders>true</XadditionalHeaders>
+							<packageName>fi.vm.kapa.xml.rova.api.delegate</packageName>
+							<wsdlUrls>
+								<wsdlUrl>${basedir}/src/main/resources/wsdl/delegate.wsdl</wsdlUrl>
+							</wsdlUrls>
+							<verbose>true</verbose>
+						</configuration>
+					</execution>
+					<execution>
+						<id>authorization</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>wsimport</goal>
+						</goals>
+						<configuration>
+							<XadditionalHeaders>true</XadditionalHeaders>
+							<packageName>fi.vm.kapa.xml.rova.api.authorization</packageName>
+							<wsdlUrls>
+								<wsdlUrl>${basedir}/src/main/resources/wsdl/authorization.wsdl</wsdlUrl>
+							</wsdlUrls>
+							<verbose>true</verbose>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<XadditionalHeaders>true</XadditionalHeaders>
-					<packageName>fi.vm.kapa.xml.rova.api</packageName>
-					<wsdlUrls>
-						<wsdlUrl>${basedir}/src/main/resources/wsdl/rova.wsdl</wsdlUrl>
-					</wsdlUrls>
-					<verbose>true</verbose>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
