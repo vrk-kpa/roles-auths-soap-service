@@ -91,6 +91,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		Response response = invocationBuilder.get();
 		Delegate delegate = response.readEntity(Delegate.class);
 
+		principal.value = delegateFactory.createPrincipal();
 		List<PrincipalType> principals = principal.value.getPrincipalElem();
 		for (fi.vm.kapa.rova.engine.model.Principal modelP : delegate.getPrincipal()) {
 			PrincipalType current = delegateFactory.createPrincipalType();
