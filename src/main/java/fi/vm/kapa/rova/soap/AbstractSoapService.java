@@ -2,6 +2,10 @@ package fi.vm.kapa.rova.soap;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceContext;
 
@@ -12,6 +16,7 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.developer.JAXWSProperties;
 
+import fi.vm.kapa.rova.soap.model.ClientHeader;
 import fi.vm.kapa.rova.soap.providers.DataProvider;
 
 abstract class AbstractSoapService extends SpringBeanAutowiringSupport {
@@ -21,32 +26,34 @@ abstract class AbstractSoapService extends SpringBeanAutowiringSupport {
 
 	@Resource
 	WebServiceContext context;
-	
+
 	@PostConstruct
 	public void init() {
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
 	}
 
 	protected String getHeaderValue(QName header) {
-		HeaderList hl = (HeaderList)context.getMessageContext().get(JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
+		HeaderList hl = (HeaderList) context.getMessageContext().get(
+				JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
 		Header h = hl.get(header, true);
 		return h.getStringContent();
 	}
 
 	protected String getClientHeaderValue(QName header) {
-		StringBuilder result = new StringBuilder();
-		HeaderList hl = (HeaderList)context.getMessageContext().get(JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
+		String result = null;
+		HeaderList hl = (HeaderList) context.getMessageContext().get(
+				JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
 		Header h = hl.get(header, true);
-		String content = h.getStringContent();
-		for (String s : content.split("\n")) {
-			s = s.trim();
-			if (s.length() > 0) {
-				result.append(s);
-				result.append("_");
-			}
+		try {
+			JAXBContext jc = JAXBContext.newInstance(ClientHeader.class);
+			Unmarshaller unmarshaller = jc.createUnmarshaller();
+			JAXBElement<ClientHeader> jb = unmarshaller.unmarshal(h.readHeader(), ClientHeader.class);
+			ClientHeader ch = jb.getValue();
+			result = ch.getServiceName();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		// trim the last separator and return
-		return result.substring(0, result.length()-1);
+		return result;
 	}
-
 }
