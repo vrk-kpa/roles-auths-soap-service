@@ -43,6 +43,12 @@
 				</xsd:sequence>
 			</xsd:complexType>
 
+			<xsd:complexType name="Principal">
+				<xsd:choice >
+					<xsd:element name="principalElem" maxOccurs="unbounded" minOccurs="0" nillable="true" type="tns:PrincipalType"/>
+				</xsd:choice>
+			</xsd:complexType>
+
 			<xsd:complexType name="DecisionReasonType">
 				<xsd:sequence>
 					<xsd:element name="reasonRule" type="xsd:string" />
@@ -65,7 +71,7 @@
 			<xsd:complexType name="RovaDelegateResponse">
 				<xsd:sequence>
 					<xsd:element name="rovaDelegateServiceRequest" type="items:Request" />
-					<xsd:element name="PrincipalResponse" type="items:PrincipalType" />
+					<xsd:element name="PrincipalResponse" type="items:Principal" />
 					<xsd:element name="AuthorizationResponse" type="items:AuthorizationResponseType" nillable="true" minOccurs="0" />
 				</xsd:sequence>
 			</xsd:complexType>

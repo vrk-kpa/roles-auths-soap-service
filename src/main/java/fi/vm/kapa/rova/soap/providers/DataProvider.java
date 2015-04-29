@@ -7,6 +7,7 @@ import javax.xml.ws.Holder;
 import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
 import fi.vm.kapa.xml.rova.api.delegate.AuthorizationResponseType;
 import fi.vm.kapa.xml.rova.api.delegate.Principal;
+import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 
 public interface DataProvider {
 

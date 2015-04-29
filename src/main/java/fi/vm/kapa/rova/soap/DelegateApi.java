@@ -1,5 +1,6 @@
 package fi.vm.kapa.rova.soap;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.jws.WebService;
@@ -26,13 +27,14 @@ public class DelegateApi extends AbstractSoapService implements
 			Holder<Request> rovaDelegateServiceRequest,
 			Holder<Principal> principalResponse,
 			Holder<AuthorizationResponseType> authorizationResponse) {
-
+	
 		rovaDelegateServiceRequest.value = factory.createRequest();
 		rovaDelegateServiceRequest.value
 				.setDelegateIdentifier(delegateIdentifier);
 
 		dataProvider.handlePrincipalResponse(delegateIdentifier, getService(),
 				getEndUserId(), getRequestId(), principalResponse, authorizationResponse);
+
 	}
 
 	private String getEndUserId() {
