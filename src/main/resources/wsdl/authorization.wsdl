@@ -130,7 +130,7 @@
 	<wsdl:service name="Rova_Authorization_Service">
 		<wsdl:documentation>WSDL-file for RoVa Authorization service</wsdl:documentation>
 		<wsdl:port name="rovaAuthorizationPort" binding="tns:rovaAuthorizationBinding">
-			<soap:address location="http://localhost:8000/rova-api/authorization" />
+			<soap:address location="http://localhost:8000/rova/authorization" />
 		</wsdl:port>
 	</wsdl:service>
 	<!-- Schema for identifiers (reduced) -->

@@ -44,9 +44,9 @@
 			</xsd:complexType>
 
 			<xsd:complexType name="Principal">
-				<xsd:choice >
+				<xsd:sequence>
 					<xsd:element name="principalElem" maxOccurs="unbounded" minOccurs="0" nillable="true" type="tns:PrincipalType"/>
-				</xsd:choice>
+				</xsd:sequence>
 			</xsd:complexType>
 
 			<xsd:complexType name="DecisionReasonType">
@@ -133,7 +133,7 @@
 	<wsdl:service name="Rova_Delegate_Service">
 		<wsdl:documentation>WSDL-file for RoVa Delegate service</wsdl:documentation>
 		<wsdl:port name="rovaDelegatePort" binding="tns:rovaDelegateBinding">
-			<soap:address location="http://localhost:8000/rova-api/delegate" />
+			<soap:address location="http://localhost:8000/rova/delegate" />
 		</wsdl:port>
 	</wsdl:service>
 	<!-- Schema for identifiers (reduced) -->
