@@ -1,6 +1,5 @@
 package fi.vm.kapa.rova.soap;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.jws.WebService;
