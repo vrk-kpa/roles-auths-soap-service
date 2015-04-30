@@ -18,6 +18,7 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import fi.vm.kapa.rova.config.SpringProperties;
@@ -70,12 +71,17 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		Invocation.Builder invocationBuilder = webTarget
 				.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
-		Authorization auth = response.readEntity(Authorization.class);
-
-		authorizationTypeResponse.value =   AuthorizationType.fromValue(auth.getResult().toString());
-
-		if (auth.getReasons() != null) {
-			addReasons(auth.getReasons(), reason);
+		if (response.getStatus() == HttpStatus.OK.value()) {
+			Authorization auth = response.readEntity(Authorization.class);
+		
+			authorizationTypeResponse.value =   AuthorizationType.fromValue(auth.getResult().toString());
+			if (auth.getReasons() != null) {
+				addReasons(auth.getReasons(), reason);
+			}
+		} else {
+			// Engine error response 
+			// TODO handle error response
+			LOG.severe("Got error response from engine");
 		}
 	}
 
@@ -90,18 +96,25 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		Invocation.Builder invocationBuilder = webTarget
 				.request(MediaType.APPLICATION_JSON);
 		Response response = invocationBuilder.get();
-		Delegate delegate = response.readEntity(Delegate.class);
-
-		principal.value = delegateFactory.createPrincipal();
-		List<PrincipalType> principals = principal.value.getPrincipalElem();
-		for (fi.vm.kapa.rova.engine.model.Principal modelP : delegate.getPrincipal()) {
-			PrincipalType current = delegateFactory.createPrincipalType();
-			current.setTargetIdentifier(modelP.getPersonId());
-			current.setTargetName(modelP.getName());
-			principals.add(current);
-		}
 		
-		addAuthorizationType(delegate, authorizationResponseType);
+		if (response.getStatus() == HttpStatus.OK.value()) {
+			Delegate delegate = response.readEntity(Delegate.class);
+	
+			principal.value = delegateFactory.createPrincipal();
+			List<PrincipalType> principals = principal.value.getPrincipalElem();
+			for (fi.vm.kapa.rova.engine.model.Principal modelP : delegate.getPrincipal()) {
+				PrincipalType current = delegateFactory.createPrincipalType();
+				current.setTargetIdentifier(modelP.getPersonId());
+				current.setTargetName(modelP.getName());
+				principals.add(current);
+			}
+			
+			addAuthorizationType(delegate, authorizationResponseType);
+		} else {
+			// Engine error response 
+			// TODO handle error response
+			LOG.severe("Got error response from engine");
+		}
 	}
 
 	private Client getClient() {
