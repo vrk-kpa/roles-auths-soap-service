@@ -59,8 +59,8 @@
 			
 			<xsd:complexType name="RovaAuthorizationResponse">
 				<xsd:sequence>
-					<xsd:element name="Authorization" type="items:AuthorizationType" />
-					<xsd:element name="Reason" maxOccurs="unbounded" minOccurs="0" nillable="true" type="tns:DecisionReasonType" />
+					<xsd:element name="authorization" type="items:AuthorizationType" />
+					<xsd:element name="reason" maxOccurs="unbounded" minOccurs="0" nillable="true" type="tns:DecisionReasonType" />
 				</xsd:sequence>
 			</xsd:complexType>
 
