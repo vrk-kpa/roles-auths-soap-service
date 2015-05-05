@@ -1,27 +1,21 @@
 package fi.vm.kapa.rova.soap.providers;
 
-import java.util.List;
-
 import javax.xml.ws.Holder;
 
-import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
-import fi.vm.kapa.xml.rova.api.delegate.AuthorizationResponseType;
-import fi.vm.kapa.xml.rova.api.delegate.Principal;
-import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
+import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
+import fi.vm.kapa.xml.rova.api.delegate.Response;
 
 public interface DataProvider {
 
-	void handleAuthorizationTypeResponse(
+	void handleAuthorization(
 			String delegateId,
 			String principalId,
 			String service,
 			String endUserId,
 			String requestId,
-			Holder<AuthorizationType> authorizationTypeResponse,
-			Holder<List<fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType>> reason);
+			Holder<RovaAuthorizationResponse> response);
 
-	void handlePrincipalResponse(String personId, String service,
+	void handleDelegate(String personId, String service,
 			String endUserId, String requestId,
-			Holder<Principal> principal,
-			Holder<AuthorizationResponseType> authorizationResponseType);
+			Holder<Response> response);
 }

@@ -4,7 +4,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceContext;
@@ -51,7 +50,6 @@ abstract class AbstractSoapService extends SpringBeanAutowiringSupport {
 			ClientHeader ch = jb.getValue();
 			result = ch.getServiceName();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return result;

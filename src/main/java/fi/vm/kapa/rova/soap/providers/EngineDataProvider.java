@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.Holder;
 
-import org.glassfish.hk2.api.Factory;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
@@ -29,7 +28,7 @@ import fi.vm.kapa.rova.engine.resources.EngineResource;
 import fi.vm.kapa.rova.rest.validation.ValidationClientRequestFilter;
 import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
 import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
-import fi.vm.kapa.xml.rova.api.delegate.AuthorizationResponseType;
+import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
 import fi.vm.kapa.xml.rova.api.delegate.Principal;
 import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 
@@ -58,11 +57,67 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 				resource.target(engineUrl));
 	}
 
-	public void handleAuthorizationTypeResponse(String delegateId,
-			String principalId, String service, String endUserId,
-			String requestId,
-			Holder<AuthorizationType> authorizationTypeResponse,
-			Holder<List<DecisionReasonType>> reason) {
+	@Override
+	public void handleDelegate(String personId, String service,
+			String endUserId, String requestId,
+			Holder<fi.vm.kapa.xml.rova.api.delegate.Response> delegateResponse) {
+
+		WebTarget webTarget = getClient().target(
+				engineUrl + "delegate" + "/" + service + "/" + endUserId + "/"
+						+ personId);
+
+		Invocation.Builder invocationBuilder = webTarget
+				.request(MediaType.APPLICATION_JSON);
+		Response response = invocationBuilder.get();
+
+		if (response.getStatus() == HttpStatus.OK.value()) {
+			Delegate delegate = response.readEntity(Delegate.class);
+			System.out.println(delegateResponse);
+			if (delegateResponse.value == null) {
+				delegateResponse.value = delegateFactory.createResponse();
+			}
+			Principal principal = delegateFactory.createPrincipal();
+
+			List<PrincipalType> principals = principal.getPrincipal();
+			for (fi.vm.kapa.rova.engine.model.Principal modelP : delegate
+					.getPrincipal()) {
+				PrincipalType current = delegateFactory.createPrincipalType();
+				current.setIdentifier(modelP.getPersonId());
+				current.setName(modelP.getName());
+				principals.add(current);
+			}
+			delegateResponse.value.setPrincipalList(principal);
+			;
+
+			List<DecisionReason> reasons = delegate.getReasons();
+			if (reasons != null) {
+				List<fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType> reason = delegateResponse.value
+						.getReason();
+				for (DecisionReason dr : reasons) {
+					fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType drt = new fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType();
+					drt.setRule(dr.getReasonRule());
+					drt.setValue(dr.getReasonValue());
+					reason.add(drt);
+				}
+			}
+
+			if (delegate.getAuthorizationType() != null) {
+				delegateResponse.value
+						.setAuthorization(fi.vm.kapa.xml.rova.api.delegate.AuthorizationType
+								.valueOf(delegate.getAuthorizationType()
+										.toString()));
+			}
+		} else {
+			// Engine error response
+			// TODO handle error response
+			LOG.severe("Got error response from engine");
+		}
+
+	}
+
+	public void handleAuthorization(String delegateId, String principalId,
+			String service, String endUserId, String requestId,
+			Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
 
 		WebTarget webTarget = getClient().target(
 				engineUrl + "authorization" + "/" + service + "/" + endUserId
@@ -73,45 +128,21 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		Response response = invocationBuilder.get();
 		if (response.getStatus() == HttpStatus.OK.value()) {
 			Authorization auth = response.readEntity(Authorization.class);
-		
-			authorizationTypeResponse.value =   AuthorizationType.fromValue(auth.getResult().toString());
-			if (auth.getReasons() != null) {
-				addReasons(auth.getReasons(), reason);
-			}
-		} else {
-			// Engine error response 
-			// TODO handle error response
-			LOG.severe("Got error response from engine");
-		}
-	}
 
-	public void handlePrincipalResponse(String personId, String service,
-			String endUserId, String requestId, Holder<Principal> principal,
-			Holder<AuthorizationResponseType> authorizationResponseType) {
-
-		WebTarget webTarget = getClient().target(
-				engineUrl + "delegate" + "/" + service + "/" + endUserId + "/"
-						+ personId);
-
-		Invocation.Builder invocationBuilder = webTarget
-				.request(MediaType.APPLICATION_JSON);
-		Response response = invocationBuilder.get();
-		
-		if (response.getStatus() == HttpStatus.OK.value()) {
-			Delegate delegate = response.readEntity(Delegate.class);
+			authorizationResponseHolder.value = authorizationFactory.createRovaAuthorizationResponse();
+			authorizationResponseHolder.value.setAuthorization(AuthorizationType.fromValue(auth
+					.getResult().toString()));
 	
-			principal.value = delegateFactory.createPrincipal();
-			List<PrincipalType> principals = principal.value.getPrincipalElem();
-			for (fi.vm.kapa.rova.engine.model.Principal modelP : delegate.getPrincipal()) {
-				PrincipalType current = delegateFactory.createPrincipalType();
-				current.setTargetIdentifier(modelP.getPersonId());
-				current.setTargetName(modelP.getName());
-				principals.add(current);
+			if (auth.getReasons() != null) {
+				for (DecisionReason dr : auth.getReasons()) {
+					DecisionReasonType drt = new DecisionReasonType();
+					drt.setRule(dr.getReasonRule());
+					drt.setValue(dr.getReasonValue());
+					authorizationResponseHolder.value.getReason().add(drt);
+				}
 			}
-			
-			addAuthorizationType(delegate, authorizationResponseType);
 		} else {
-			// Engine error response 
+			// Engine error response
 			// TODO handle error response
 			LOG.severe("Got error response from engine");
 		}
@@ -134,30 +165,9 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 			}
 			for (DecisionReason dr : reasons) {
 				DecisionReasonType drt = new DecisionReasonType();
-				drt.setReasonRule(dr.getReasonRule());
-				drt.setReasonValue(dr.getReasonValue());
+				drt.setRule(dr.getReasonRule());
+				drt.setValue(dr.getReasonValue());
 				reason.value.add(drt);
-			}
-		}
-	}
-
-	private void addAuthorizationType(Delegate delegate,
-			Holder<AuthorizationResponseType> authorization) {
-		if (delegate.getAuthorizationType() != null) {
-			if (authorization.value == null) {
-				authorization.value = delegateFactory
-						.createAuthorizationResponseType();
-			}
-			fi.vm.kapa.xml.rova.api.delegate.AuthorizationType aType = fi.vm.kapa.xml.rova.api.delegate.AuthorizationType
-					.fromValue(delegate.getAuthorizationType().toString());
-			authorization.value.setAuthorizationResponse(aType);
-
-			List<DecisionReason> reasons = delegate.getReasons();
-			for (DecisionReason dr : reasons) {
-				fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType drt = new fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType();
-				drt.setReasonRule(dr.getReasonRule());
-				drt.setReasonValue(dr.getReasonValue());
-				authorization.value.getReason().add(drt);
 			}
 		}
 	}

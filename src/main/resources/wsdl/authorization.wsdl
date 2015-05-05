@@ -1,26 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wsdl:definitions 
-	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns:xrd="http://x-road.ee/xsd/x-road.xsd" 
-	xmlns:sdsb="http://x-road.eu/xsd/sdsb.xsd"
-	xmlns:ns="http://x-road.eu/xsd/identifiers" 
-	xmlns:items="http://xml.vrk.fi/ws/Rova/Authorization/Entities" 
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:xrd="http://x-road.ee/xsd/x-road.xsd" xmlns:sdsb="http://x-road.eu/xsd/sdsb.xsd"
+	xmlns:ns="http://x-road.eu/xsd/identifiers" xmlns:items="http://xml.vrk.fi/ws/Rova/Authorization/Entities"
 	xmlns:request="http://xml.vrk.fi/ws/Rova/Authorization/Request"
-	xmlns:response="http://xml.vrk.fi/ws/Rova/Authorization/Response" 
-	xmlns:tns="http://xml.vrk.fi/ws/Rova/Authorization"
-	name="RovaAuthorization"
+	xmlns:response="http://xml.vrk.fi/ws/Rova/Authorization/Response"
+	xmlns:tns="http://xml.vrk.fi/ws/Rova/Authorization" name="RovaAuthorization"
 	targetNamespace="http://xml.vrk.fi/ws/Rova/Authorization">
 	<wsdl:types>
 		<xsd:schema>
-			<xsd:import namespace="http://x-road.eu/xsd/sdsb.xsd" schemaLocation="xroad6sdsb.xsd" />
+			<xsd:import namespace="http://x-road.eu/xsd/sdsb.xsd"
+				schemaLocation="xroad6sdsb.xsd" />
 		</xsd:schema>
 		<xsd:schema xmlns:tns="http://xml.vrk.fi/ws/Rova/Authorization/Entities"
 			xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://xml.vrk.fi/ws/Rova/Authorization/Entities">
 			<xsd:complexType name="Request">
 				<xsd:sequence>
-					<xsd:element name="DelegateIdentifier">
+					<xsd:element name="delegateIdentifier">
 						<xsd:annotation>
 							<xsd:documentation>
 								Mandatory. Unique identifier of delegate
@@ -32,7 +28,7 @@
 							<xsd:restriction base="xsd:string" />
 						</xsd:simpleType>
 					</xsd:element>
-					<xsd:element name="PrincipalIdentifier">
+					<xsd:element name="principalIdentifier">
 						<xsd:annotation>
 							<xsd:documentation>
 								Optional. This is used when authorization for
@@ -46,34 +42,44 @@
 					</xsd:element>
 				</xsd:sequence>
 			</xsd:complexType>
-			<xsd:element name="rovaAuthorizationService" type="items:Request" />
-			<xsd:complexType name="PrincipalType">
-				<xsd:sequence>
-					<xsd:element name="TargetIdentifier" type="xsd:string" />
-					<xsd:element name="TargetName" type="xsd:string" />
-				</xsd:sequence>
-			</xsd:complexType>
+			
 			<xsd:complexType name="DecisionReasonType">
 				<xsd:sequence>
-					<xsd:element name="reasonRule" type="xsd:string" />
-					<xsd:element name="reasonValue" type="xsd:string" />
+					<xsd:element name="rule" type="xsd:string" />
+					<xsd:element name="value" type="xsd:string" />
 				</xsd:sequence>
 			</xsd:complexType>
+			
 			<xsd:simpleType name="AuthorizationType">
 				<xsd:restriction base="xsd:string">
 					<xsd:enumeration value="ALLOWED" />
 					<xsd:enumeration value="DISALLOWED" />
 				</xsd:restriction>
 			</xsd:simpleType>
+			
 			<xsd:complexType name="RovaAuthorizationResponse">
 				<xsd:sequence>
-					<xsd:element name="rovaAuthorizationServiceRequest" type="items:Request" />
-					<xsd:element name="AuthorizationResponse" type="items:AuthorizationType" />
-					<xsd:element name="Reason" maxOccurs="unbounded"
-						minOccurs="0" nillable="true" type="tns:DecisionReasonType" />
+					<xsd:element name="Authorization" type="items:AuthorizationType" />
+					<xsd:element name="Reason" maxOccurs="unbounded" minOccurs="0" nillable="true" type="tns:DecisionReasonType" />
 				</xsd:sequence>
 			</xsd:complexType>
-			<xsd:element name="rovaAuthorizationServiceResponse" type="items:RovaAuthorizationResponse" />
+
+			<xsd:element name="rovaAuthorizationService">
+				<xsd:complexType id="Request">
+					<xsd:sequence>
+						<xsd:element name="request" type="items:Request" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="rovaAuthorizationServiceResponse">
+				<xsd:complexType id="Response">
+					<xsd:sequence>
+						<xsd:element name="request" type="items:Request" />
+						<xsd:element name="response" type="items:RovaAuthorizationResponse" />
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
 		</xsd:schema>
 	</wsdl:types>
 	<wsdl:message name="requestheader">
@@ -92,7 +98,8 @@
 	<wsdl:portType name="rovaAuthorizationPortType">
 		<wsdl:operation name="rovaAuthorizationService">
 			<wsdl:input name="rovaAuthorizationService" message="tns:rovaAuthorizationService" />
-			<wsdl:output name="rovaAuthorizationServiceResponse" message="tns:rovaAuthorizationServiceResponse" />
+			<wsdl:output name="rovaAuthorizationServiceResponse"
+				message="tns:rovaAuthorizationServiceResponse" />
 		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="rovaAuthorizationBinding" type="tns:rovaAuthorizationPortType">
@@ -128,7 +135,8 @@
 		</wsdl:operation>
 	</wsdl:binding>
 	<wsdl:service name="Rova_Authorization_Service">
-		<wsdl:documentation>WSDL-file for RoVa Authorization service</wsdl:documentation>
+		<wsdl:documentation>WSDL-file for RoVa Authorization service
+		</wsdl:documentation>
 		<wsdl:port name="rovaAuthorizationPort" binding="tns:rovaAuthorizationBinding">
 			<soap:address location="http://localhost:8000/rova/authorization" />
 		</wsdl:port>

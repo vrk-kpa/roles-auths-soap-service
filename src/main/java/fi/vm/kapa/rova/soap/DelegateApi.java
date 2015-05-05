@@ -7,10 +7,9 @@ import javax.xml.ws.Holder;
 
 import org.springframework.stereotype.Component;
 
-import fi.vm.kapa.xml.rova.api.delegate.AuthorizationResponseType;
 import fi.vm.kapa.xml.rova.api.delegate.ObjectFactory;
-import fi.vm.kapa.xml.rova.api.delegate.Principal;
 import fi.vm.kapa.xml.rova.api.delegate.Request;
+import fi.vm.kapa.xml.rova.api.delegate.Response;
 import fi.vm.kapa.xml.rova.api.delegate.RovaDelegatePortType;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.delegate.RovaDelegatePortType")
@@ -22,29 +21,24 @@ public class DelegateApi extends AbstractSoapService implements
 	ObjectFactory factory = new ObjectFactory();
 
 	@Override
-	public void rovaDelegateService(String delegateIdentifier,
-			Holder<Request> rovaDelegateServiceRequest,
-			Holder<Principal> principalResponse,
-			Holder<AuthorizationResponseType> authorizationResponse) {
-	
-		rovaDelegateServiceRequest.value = factory.createRequest();
-		rovaDelegateServiceRequest.value
-				.setDelegateIdentifier(delegateIdentifier);
-
-		dataProvider.handlePrincipalResponse(delegateIdentifier, getService(),
-				getEndUserId(), getRequestId(), principalResponse, authorizationResponse);
+	public void rovaDelegateService(Holder<Request> request,
+			Holder<Response> response) {
+		dataProvider.handleDelegate(request.value.getDelegateIdentifier(),
+				getService(), getEndUserId(), getRequestId(), response);
+		System.out.println(request.value.getDelegateIdentifier());
 
 	}
 
 	private String getEndUserId() {
 		return getHeaderValue(factory.createUserId("").getName());
 	}
-	
+
 	private String getRequestId() {
 		return getHeaderValue(factory.createId("").getName());
 	}
-	
+
 	private String getService() {
-		return getClientHeaderValue(factory.createClient(factory.createSdsbClientIdentifierType()).getName());
+		return getClientHeaderValue(factory.createClient(
+				factory.createSdsbClientIdentifierType()).getName());
 	}
 }
