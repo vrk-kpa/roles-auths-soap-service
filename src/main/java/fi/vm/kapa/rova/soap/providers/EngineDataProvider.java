@@ -1,6 +1,5 @@
 package fi.vm.kapa.rova.soap.providers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -64,7 +63,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
 		WebTarget webTarget = getClient().target(
 				engineUrl + "delegate" + "/" + service + "/" + endUserId + "/"
-						+ personId);
+						+ personId).queryParam("requestId", requestId);
 
 		Invocation.Builder invocationBuilder = webTarget
 				.request(MediaType.APPLICATION_JSON);
@@ -72,7 +71,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
 		if (response.getStatus() == HttpStatus.OK.value()) {
 			Delegate delegate = response.readEntity(Delegate.class);
-			System.out.println(delegateResponse);
 			if (delegateResponse.value == null) {
 				delegateResponse.value = delegateFactory.createResponse();
 			}
@@ -87,8 +85,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 				principals.add(current);
 			}
 			delegateResponse.value.setPrincipalList(principal);
-			;
-
+			
 			List<DecisionReason> reasons = delegate.getReasons();
 			if (reasons != null) {
 				List<fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType> reason = delegateResponse.value
@@ -121,7 +118,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
 		WebTarget webTarget = getClient().target(
 				engineUrl + "authorization" + "/" + service + "/" + endUserId
-						+ "/" + delegateId + "/" + principalId);
+						+ "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
 
 		Invocation.Builder invocationBuilder = webTarget
 				.request(MediaType.APPLICATION_JSON);
@@ -155,21 +152,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		client.register(new ValidationClientRequestFilter(engineApiKey,
 				requestAliveSeconds, null));
 		return client;
-	}
-
-	private void addReasons(List<DecisionReason> reasons,
-			Holder<List<DecisionReasonType>> reason) {
-		if (reasons != null) {
-			if (reason.value == null) {
-				reason.value = new ArrayList<DecisionReasonType>();
-			}
-			for (DecisionReason dr : reasons) {
-				DecisionReasonType drt = new DecisionReasonType();
-				drt.setRule(dr.getReasonRule());
-				drt.setValue(dr.getReasonValue());
-				reason.value.add(drt);
-			}
-		}
 	}
 
 	@Override
