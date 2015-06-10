@@ -1,6 +1,6 @@
 # roles-auths-soap-service
 
-Soap api for rova services 
+Roles and authorization xroad compatible soap api. 
 
 ## Getting Started
 Maven commands: 
