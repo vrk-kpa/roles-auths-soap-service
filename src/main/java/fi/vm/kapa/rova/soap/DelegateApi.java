@@ -25,8 +25,6 @@ public class DelegateApi extends AbstractSoapService implements
 			Holder<Response> response) {
 		dataProvider.handleDelegate(request.value.getDelegateIdentifier(),
 				getService(), getEndUserId(), getRequestId(), response);
-		System.out.println(request.value.getDelegateIdentifier());
-
 	}
 
 	private String getEndUserId() {
