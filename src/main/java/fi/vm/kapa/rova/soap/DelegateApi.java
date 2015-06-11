@@ -1,10 +1,11 @@
 package fi.vm.kapa.rova.soap;
 
-import java.util.logging.Logger;
 
 import javax.jws.WebService;
 import javax.xml.ws.Holder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import fi.vm.kapa.xml.rova.api.delegate.ObjectFactory;
@@ -16,7 +17,7 @@ import fi.vm.kapa.xml.rova.api.delegate.RovaDelegatePortType;
 @Component("rovaDelegateService")
 public class DelegateApi extends AbstractSoapService implements
 		RovaDelegatePortType {
-	Logger LOG = Logger.getLogger(DelegateApi.class.toString());
+	Logger LOG = LoggerFactory.getLogger(DelegateApi.class);
 
 	ObjectFactory factory = new ObjectFactory();
 
@@ -25,6 +26,7 @@ public class DelegateApi extends AbstractSoapService implements
 			Holder<Response> response) {
 		dataProvider.handleDelegate(request.value.getDelegateIdentifier(),
 				getService(), getEndUserId(), getRequestId(), response);
+		LOG.debug("delegateIdentifier from request: "+ request.value.getDelegateIdentifier());
 	}
 
 	private String getEndUserId() {

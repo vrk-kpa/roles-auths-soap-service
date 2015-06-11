@@ -1,10 +1,10 @@
 package fi.vm.kapa.rova.soap;
 
-import java.util.logging.Logger;
-
 import javax.jws.WebService;
 import javax.xml.ws.Holder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import fi.vm.kapa.xml.rova.api.authorization.ObjectFactory;
@@ -16,7 +16,7 @@ import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
 @Component("rovaAuthorizationService")
 public class AuthorizationApi extends AbstractSoapService implements
 		RovaAuthorizationPortType {
-	Logger LOG = Logger.getLogger(AuthorizationApi.class.toString());
+	Logger LOG = LoggerFactory.getLogger(AuthorizationApi.class);
 
 	private ObjectFactory factory = new ObjectFactory();
 
