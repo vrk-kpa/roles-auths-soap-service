@@ -34,6 +34,11 @@
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- rova model -->
 		<dependency>
 			<groupId>fi.vm.kapa.rova</groupId>
@@ -54,13 +59,14 @@
 		</dependency>
 
 		<!-- Logging dependencies -->
-		<!-- dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-		</dependency -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.logstash.logback</groupId>
+			<artifactId>logstash-logback-encoder</artifactId>
+			<version>4.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
