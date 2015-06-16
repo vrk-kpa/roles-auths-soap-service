@@ -33,11 +33,15 @@ public class AuthorizationApi extends AbstractSoapService implements
 	}
 
 	private String getRequestId() {
-		return getHeaderValue(factory.createId("").getName());
+		String clientStr = getClientHeaderValue(factory.createClient(
+				factory.createSdsbClientIdentifierType()).getName(), "/");
+		
+		return clientStr + ";" + getHeaderValue(factory.createId("").getName());
+	
 	}
 
 	private String getService() {
 		return getClientHeaderValue(factory.createClient(
-				factory.createSdsbClientIdentifierType()).getName());
+				factory.createSdsbClientIdentifierType()).getName(), "_");
 	}
 }

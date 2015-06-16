@@ -19,17 +19,18 @@ public class ClientHeader {
 	@XmlElement(namespace = "http://x-road.eu/xsd/identifiers", name = "subsystemCode")
 	private String subsystemCode;
 
-	public String getServiceName() {
+	public String getServiceName(String concatStr) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(instance);
-		sb.append("_");
+		sb.append(concatStr);
 		sb.append(memberClass);
-		sb.append("_");
+		sb.append(concatStr);
 		sb.append(memberCode);
-		sb.append("_");
+		sb.append(concatStr);
 		sb.append(subsystemCode);
 		return sb.toString();
 	}
+	
 	
 	@Override
 	public String toString() {

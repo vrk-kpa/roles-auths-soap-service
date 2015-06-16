@@ -2,12 +2,14 @@ package fi.vm.kapa.rova.soap;
 
 
 import javax.jws.WebService;
+import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import fi.vm.kapa.xml.rova.api.delegate.SdsbClientIdentifierType;
 import fi.vm.kapa.xml.rova.api.delegate.ObjectFactory;
 import fi.vm.kapa.xml.rova.api.delegate.Request;
 import fi.vm.kapa.xml.rova.api.delegate.Response;
@@ -32,13 +34,16 @@ public class DelegateApi extends AbstractSoapService implements
 	private String getEndUserId() {
 		return getHeaderValue(factory.createUserId("").getName());
 	}
-
+	
 	private String getRequestId() {
-		return getHeaderValue(factory.createId("").getName());
+		String clientStr = getClientHeaderValue(factory.createClient(
+				factory.createSdsbClientIdentifierType()).getName(), "/");
+		
+		return clientStr + ";" + getHeaderValue(factory.createId("").getName());
 	}
-
+		
 	private String getService() {
 		return getClientHeaderValue(factory.createClient(
-				factory.createSdsbClientIdentifierType()).getName());
+				factory.createSdsbClientIdentifierType()).getName(), "_");
 	}
 }

@@ -38,7 +38,7 @@ abstract class AbstractSoapService extends SpringBeanAutowiringSupport {
 		return h.getStringContent();
 	}
 
-	protected String getClientHeaderValue(QName header) {
+	protected String getClientHeaderValue(QName header, String concatStr) {
 		String result = null;
 		HeaderList hl = (HeaderList) context.getMessageContext().get(
 				JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
@@ -48,10 +48,12 @@ abstract class AbstractSoapService extends SpringBeanAutowiringSupport {
 			Unmarshaller unmarshaller = jc.createUnmarshaller();
 			JAXBElement<ClientHeader> jb = unmarshaller.unmarshal(h.readHeader(), ClientHeader.class);
 			ClientHeader ch = jb.getValue();
-			result = ch.getServiceName();
+			result = ch.getServiceName(concatStr);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
+	
+	
 }
