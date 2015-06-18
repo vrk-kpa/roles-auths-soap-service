@@ -36,6 +36,7 @@ public class SoapHeaderCopyHandler implements SOAPHandler<SOAPMessageContext> {
 				soapEnv = soapMsg.getSOAPPart().getEnvelope();
 				SOAPHeader soapHeader = soapEnv.getHeader();
 				List<SOAPHeaderElement> headerList = new ArrayList<SOAPHeaderElement>();
+				@SuppressWarnings("rawtypes")
 				Iterator childs = soapHeader.getChildElements();
 				while (childs.hasNext()) {
 					headerList.add((SOAPHeaderElement)childs.next());
@@ -52,6 +53,7 @@ public class SoapHeaderCopyHandler implements SOAPHandler<SOAPMessageContext> {
 				}
 				SOAPHeader header = soapEnv.getHeader();
 				
+				@SuppressWarnings("unchecked")
 				List<SOAPHeaderElement> headerList = (List<SOAPHeaderElement>)messageContext.get("original-soap-headers");
 				for (SOAPHeaderElement h : headerList) {
 					header.addChildElement((h));

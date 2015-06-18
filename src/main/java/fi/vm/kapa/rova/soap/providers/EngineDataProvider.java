@@ -1,8 +1,6 @@
 package fi.vm.kapa.rova.soap.providers;
 
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.client.Client;
@@ -13,14 +11,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.Holder;
 
-
-
-//import org.apache.log4j.Logger;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -30,6 +24,8 @@ import fi.vm.kapa.rova.engine.model.Authorization;
 import fi.vm.kapa.rova.engine.model.DecisionReason;
 import fi.vm.kapa.rova.engine.model.Delegate;
 import fi.vm.kapa.rova.engine.resources.EngineResource;
+import fi.vm.kapa.rova.logging.Logger;
+import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
 import fi.vm.kapa.rova.rest.validation.ValidationClientRequestFilter;
 import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
 import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
@@ -39,7 +35,7 @@ import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
-	Logger LOG = LoggerFactory.getLogger(EngineDataProvider.class);
+	Logger LOG = Logger.getLogger(EngineDataProvider.class, Logger.SOAP_SERVICE);
 
 	EngineResource engineResource = null;
 	private fi.vm.kapa.xml.rova.api.authorization.ObjectFactory authorizationFactory = new fi.vm.kapa.xml.rova.api.authorization.ObjectFactory();
@@ -64,18 +60,15 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 	@Override
 	public void handleDelegate(String personId, String service, String endUserId, String requestId,
 			Holder<fi.vm.kapa.xml.rova.api.delegate.Response> delegateResponse) {
+		LOG.debug("handleDelegate("+ personId +", "+ service +", "+ endUserId +", "+ requestId +")");
 
 		WebTarget webTarget = getClient().target(engineUrl + "delegate" + "/" + service + "/" 
 				+ endUserId + "/" + personId).queryParam("requestId", requestId);
 
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 		
-		NumberFormat nf = NumberFormat.getNumberInstance(new Locale("FI", "fi"));
-		long startTime = System.currentTimeMillis();
-		
 		Response response = invocationBuilder.get();
 
-		LOG.info("Engine responded to delegate request in "+ nf.format((System.currentTimeMillis() - startTime)/1000D));
 		if (response.getStatus() == HttpStatus.OK.value()) {
 			Delegate delegate = response.readEntity(Delegate.class);
 			if (delegateResponse.value == null) {
@@ -108,7 +101,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 						fi.vm.kapa.xml.rova.api.delegate.AuthorizationType.valueOf(delegate.getAuthorizationType().toString()));
 			}
 		} else {
-			// Engine error response
 			// TODO handle error response
 			LOG.error("Got error response from engine");
 		}
@@ -117,18 +109,15 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
 	public void handleAuthorization(String delegateId, String principalId, String service, 
 			String endUserId, String requestId, Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
+		LOG.debug("handleAuthorization("+ delegateId +", "+ principalId +", "+ service +", "+ endUserId +", "+ requestId +")");
 
 		WebTarget webTarget = getClient().target(engineUrl + "authorization" + "/" + service 
 				+ "/" + endUserId + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
 
 		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
-		NumberFormat nf = NumberFormat.getNumberInstance(new Locale("FI", "fi"));
-		long startTime = System.currentTimeMillis();
-
 		Response response = invocationBuilder.get();
 
-		LOG.info("Engine responded to authorization request in "+ nf.format((System.currentTimeMillis() - startTime)/1000D));
 		if (response.getStatus() == HttpStatus.OK.value()) {
 			Authorization auth = response.readEntity(Authorization.class);
 
@@ -144,7 +133,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 				}
 			}
 		} else {
-			// Engine error response
 			// TODO handle error response
 			LOG.error("Got error response from engine");
 		}
@@ -154,8 +142,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 		ClientConfig clientConfig = new ClientConfig();
 		Client client = ClientBuilder.newClient(clientConfig);
 		client.register(JacksonFeature.class);
-		client.register(new ValidationClientRequestFilter(engineApiKey,
-				requestAliveSeconds, null));
+		client.register(new ValidationClientRequestFilter(engineApiKey, requestAliveSeconds, null));
+		client.register(new LoggingClientRequestFilter());
 		return client;
 	}
 
