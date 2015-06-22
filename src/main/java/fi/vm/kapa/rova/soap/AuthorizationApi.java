@@ -72,14 +72,18 @@ public class AuthorizationApi extends AbstractSoapService implements
 
 		sb.append(" delegate=");
 		if (request.value != null && request.value.getDelegateIdentifier() != null) {
-			sb.append(request.value.getDelegateIdentifier().substring(0, 6));
+			int endIndex = request.value.getDelegateIdentifier().length();
+			endIndex = endIndex > 6 ? 6 : endIndex;
+			sb.append(request.value.getDelegateIdentifier().substring(0, endIndex));
 		} else {
 			sb.append("no_valid_delegate_identifier");
 		}
 
 		sb.append(" principal=");
 		if (request.value != null && request.value.getPrincipalIdentifier() != null) {
-			sb.append(request.value.getPrincipalIdentifier().substring(0, 6));
+			int endIndex = request.value.getPrincipalIdentifier().length();
+			endIndex = endIndex > 6 ? 6 : endIndex;
+			sb.append(request.value.getPrincipalIdentifier().substring(0, endIndex));
 		} else {
 			sb.append("no_valid_principal_identifier");
 		}
