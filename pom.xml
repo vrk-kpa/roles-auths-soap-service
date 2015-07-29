@@ -5,7 +5,6 @@
 	<groupId>fi.kapa.rova</groupId>
 	<artifactId>roles-auths-soap-service</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<packaging>war</packaging>
 
 	<name>rova-api</name>
 	<properties>
@@ -108,13 +107,12 @@
 					<groupId>javax.servlet</groupId>
 					<artifactId>servlet-api</artifactId>
 				</exclusion>
-				<!-- exclusion> <groupId>org.springframework</groupId> <artifactId>spring</artifactId> 
-					</exclusion> <exclusion> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId> 
-					</exclusion> <exclusion> <groupId>org.springframework</groupId> <artifactId>spring-context</artifactId> 
-					</exclusion -->
 			</exclusions>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jersey</artifactId>
+		</dependency>
 		<!-- Jersey: SPRING support -->
 		<dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
@@ -192,13 +190,6 @@
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
 			<plugin>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.4</version>
-				<configuration>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
-				</configuration>
-			</plugin>
-			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
@@ -206,15 +197,16 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-
 			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.2</version>
-				<configuration>
-					<port>8000</port>
-					<path>/</path>
-				</configuration>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

@@ -9,12 +9,6 @@
             http://jax-ws.dev.java.net/spring/servlet
             http://jax-ws.dev.java.net/spring/servlet.xsd">
 
-	<!-- Define our jaxws endpoint (replaces sun-jaxws.xml) -->
-	<!-- wss:binding url="/rova-api"> <wss:service> <ws:service bean="#rovaService"> 
-		<ws:handlers> <ref bean="xroadHeaderHandler" /> </ws:handlers> </ws:service> 
-		</wss:service> </wss:binding> <wss:binding url="/rova-api/v1"> <wss:service> 
-		<ws:service bean="#rovaService"> <ws:handlers> <ref bean="xroadHeaderHandler" 
-		/> </ws:handlers> </ws:service> </wss:service> </wss:binding> -->
 	<wss:binding url="/rova/delegate">
 		<wss:service>
 			<ws:service bean="#rovaDelegateService">

@@ -5,5 +5,7 @@ Roles and authorization xroad compatible soap api.
 ## Getting Started
 Maven commands: 
 * mvn install 
-* mvn tomcat7:run
+* mvn spring-boot:run
 
+## Start standalone jar
+java -Dserver.port=8000 -jar target/roles-auths-soap-service.jar
