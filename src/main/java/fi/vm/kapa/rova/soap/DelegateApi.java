@@ -39,14 +39,14 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
 	
 	private String getRequestId() {
 		String clientStr = getClientHeaderValue(factory.createClient(
-				factory.createSdsbClientIdentifierType()).getName(), "/");
+				factory.createXRoadClientIdentifierType()).getName(), "/");
 		
 		return clientStr + ";" + getHeaderValue(factory.createId("").getName());
 	}
 		
 	private String getService() {
 		return getClientHeaderValue(factory.createClient(
-				factory.createSdsbClientIdentifierType()).getName(), "_");
+				factory.createXRoadClientIdentifierType()).getName(), "_");
 	}
 	
 	private void logDelegateRequest(Holder<Request> request,

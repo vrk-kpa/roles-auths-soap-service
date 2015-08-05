@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
 	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns:xrd="http://x-road.ee/xsd/x-road.xsd" xmlns:sdsb="http://x-road.eu/xsd/sdsb.xsd"
+	xmlns:xrd="http://x-road.ee/xsd/x-road.xsd" xmlns:xroad="http://x-road.eu/xsd/xroad.xsd"
 	xmlns:ns="http://x-road.eu/xsd/identifiers" xmlns:items="http://xml.vrk.fi/ws/Rova/Authorization/Entities"
 	xmlns:request="http://xml.vrk.fi/ws/Rova/Authorization/Request"
 	xmlns:response="http://xml.vrk.fi/ws/Rova/Authorization/Response"
@@ -9,8 +9,8 @@
 	targetNamespace="http://xml.vrk.fi/ws/Rova/Authorization">
 	<wsdl:types>
 		<xsd:schema>
-			<xsd:import namespace="http://x-road.eu/xsd/sdsb.xsd"
-				schemaLocation="xroad6sdsb.xsd" />
+			<xsd:import namespace="http://x-road.eu/xsd/xroad.xsd"
+				schemaLocation="xroad6.xsd" />
 		</xsd:schema>
 		<xsd:schema xmlns:tns="http://xml.vrk.fi/ws/Rova/Authorization/Entities"
 			xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://xml.vrk.fi/ws/Rova/Authorization/Entities">
@@ -83,11 +83,11 @@
 		</xsd:schema>
 	</wsdl:types>
 	<wsdl:message name="requestheader">
-		<wsdl:part name="client" element="sdsb:client" />
-		<wsdl:part name="service" element="sdsb:service" />
-		<wsdl:part name="userId" element="sdsb:userId" />
-		<wsdl:part name="id" element="sdsb:id" />
-		<wsdl:part name="async" element="sdsb:async" />
+		<wsdl:part name="client" element="xroad:client" />
+		<wsdl:part name="service" element="xroad:service" />
+		<wsdl:part name="userId" element="xroad:userId" />
+		<wsdl:part name="id" element="xroad:id" />
+		<wsdl:part name="async" element="xroad:async" />
 	</wsdl:message>
 	<wsdl:message name="rovaAuthorizationService">
 		<wsdl:part name="Request" element="items:rovaAuthorizationService" />
