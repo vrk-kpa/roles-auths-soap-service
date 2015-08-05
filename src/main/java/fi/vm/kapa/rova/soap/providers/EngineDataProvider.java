@@ -2,7 +2,6 @@ package fi.vm.kapa.rova.soap.providers;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -12,9 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.ws.Holder;
 
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -23,7 +20,6 @@ import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.model.Authorization;
 import fi.vm.kapa.rova.engine.model.DecisionReason;
 import fi.vm.kapa.rova.engine.model.Delegate;
-import fi.vm.kapa.rova.engine.resources.EngineResource;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
 import fi.vm.kapa.rova.rest.validation.ValidationClientRequestFilter;
@@ -37,7 +33,6 @@ import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 public class EngineDataProvider implements DataProvider, SpringProperties {
 	Logger LOG = Logger.getLogger(EngineDataProvider.class, Logger.SOAP_SERVICE);
 
-	EngineResource engineResource = null;
 	private fi.vm.kapa.xml.rova.api.authorization.ObjectFactory authorizationFactory = new fi.vm.kapa.xml.rova.api.authorization.ObjectFactory();
 	private fi.vm.kapa.xml.rova.api.delegate.ObjectFactory delegateFactory = new fi.vm.kapa.xml.rova.api.delegate.ObjectFactory();
 
@@ -50,12 +45,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 	@Value(REQUEST_ALIVE_SECONDS)
 	private Integer requestAliveSeconds;
 
-	@PostConstruct
-	public void init() {
-		ClientConfig cc = new ClientConfig().register(JacksonFeature.class);
-		Client resource = ClientBuilder.newClient(cc);
-		engineResource = WebResourceFactory.newResource(EngineResource.class, resource.target(engineUrl));
-	}
 
 	@Override
 	public void handleDelegate(String personId, String service, String endUserId, String requestId,
