@@ -49,7 +49,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 	@Override
 	public void handleDelegate(String personId, String service, String endUserId, String requestId,
 			Holder<fi.vm.kapa.xml.rova.api.delegate.Response> delegateResponse) {
-		LOG.debug("handleDelegate("+ personId +", "+ service +", "+ endUserId +", "+ requestId +")");
+		LOG.info("handleDelegate("+ personId +", "+ service +", "+ endUserId +", "+ requestId +")");
 
 		WebTarget webTarget = getClient().target(engineUrl + "delegate" + "/" + service + "/" 
 				+ endUserId + "/" + personId).queryParam("requestId", requestId);
@@ -98,7 +98,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
 	public void handleAuthorization(String delegateId, String principalId, String service, 
 			String endUserId, String requestId, Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
-		LOG.debug("handleAuthorization("+ delegateId +", "+ principalId +", "+ service +", "+ endUserId +", "+ requestId +")");
+		LOG.info("handleAuthorization("+ delegateId +", "+ principalId +", "+ service +", "+ endUserId +", "+ requestId +")");
 
 		WebTarget webTarget = getClient().target(engineUrl + "authorization" + "/" + service 
 				+ "/" + endUserId + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);

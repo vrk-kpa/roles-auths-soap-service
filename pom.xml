@@ -222,7 +222,7 @@
 						<configuration>
 							<XadditionalHeaders>true</XadditionalHeaders>
 							<packageName>fi.vm.kapa.xml.rova.api.delegate</packageName>
-							<wsdlLocation>../../../../../../wsdl/delegate.wsdl</wsdlLocation>
+							<wsdlLocation>../../../../../../../wsdl/delegate.wsdl</wsdlLocation>
 							<wsdlUrls>
 								<wsdlUrl>${basedir}/src/main/resources/wsdl/delegate.wsdl</wsdlUrl>
 							</wsdlUrls>
@@ -238,7 +238,7 @@
 						<configuration>
 							<XadditionalHeaders>true</XadditionalHeaders>
 							<packageName>fi.vm.kapa.xml.rova.api.authorization</packageName>
-							<wsdlLocation>../../../../../../wsdl/authorization.wsdl</wsdlLocation>
+							<wsdlLocation>../../../../../../../wsdl/authorization.wsdl</wsdlLocation>
 							<wsdlUrls>
 								<wsdlUrl>${basedir}/src/main/resources/wsdl/authorization.wsdl</wsdlUrl>
 							</wsdlUrls>
