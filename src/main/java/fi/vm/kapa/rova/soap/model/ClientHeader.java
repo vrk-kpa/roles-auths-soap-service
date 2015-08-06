@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ClientHeader {
 
-	@XmlElement(namespace = "http://x-road.eu/xsd/identifiers", name = "sdsbInstance")
+	@XmlElement(namespace = "http://x-road.eu/xsd/identifiers", name = "xRoadInstance")
 	private String instance;
 
 	@XmlElement(namespace = "http://x-road.eu/xsd/identifiers", name = "memberClass")
