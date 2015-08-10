@@ -6,7 +6,7 @@
 	<artifactId>roles-auths-soap-service</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
-	<name>rova-api</name>
+	<name>roles-auths-soap-service</name>
 	<properties>
 		<jersey.version>2.15</jersey.version>
 		<cxf.version>2.2.3</cxf.version>
