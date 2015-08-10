@@ -20,40 +20,39 @@ import fi.vm.kapa.rova.soap.providers.DataProvider;
 
 abstract class AbstractSoapService extends SpringBeanAutowiringSupport {
 
-	@Autowired
-	DataProvider dataProvider;
+    @Autowired
+    DataProvider dataProvider;
 
-	@Resource
-	WebServiceContext context;
+    @Resource
+    WebServiceContext context;
 
-	@PostConstruct
-	public void init() {
-		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
-	}
+    @PostConstruct
+    public void init() {
+        SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+    }
 
-	protected String getHeaderValue(QName header) {
-		HeaderList hl = (HeaderList) context.getMessageContext().get(
-				JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
-		Header h = hl.get(header, true);
-		return h.getStringContent();
-	}
+    protected String getHeaderValue(QName header) {
+        HeaderList hl = (HeaderList) context.getMessageContext().get(
+                JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
+        Header h = hl.get(header, true);
+        return h.getStringContent();
+    }
 
-	protected String getClientHeaderValue(QName header, String concatStr) {
-		String result = null;
-		HeaderList hl = (HeaderList) context.getMessageContext().get(
-				JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
-		Header h = hl.get(header, true);
-		try {
-			JAXBContext jc = JAXBContext.newInstance(ClientHeader.class);
-			Unmarshaller unmarshaller = jc.createUnmarshaller();
-			JAXBElement<ClientHeader> jb = unmarshaller.unmarshal(h.readHeader(), ClientHeader.class);
-			ClientHeader ch = jb.getValue();
-			result = ch.getServiceName(concatStr);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
-	
-	
+    protected String getClientHeaderValue(QName header, String concatStr) {
+        String result = null;
+        HeaderList hl = (HeaderList) context.getMessageContext().get(
+                JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
+        Header h = hl.get(header, true);
+        try {
+            JAXBContext jc = JAXBContext.newInstance(ClientHeader.class);
+            Unmarshaller unmarshaller = jc.createUnmarshaller();
+            JAXBElement<ClientHeader> jb = unmarshaller.unmarshal(h.readHeader(), ClientHeader.class);
+            ClientHeader ch = jb.getValue();
+            result = ch.getServiceName(concatStr);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
 }

@@ -1,6 +1,5 @@
 package fi.vm.kapa.rova.soap;
 
-
 import java.util.Iterator;
 
 import javax.jws.WebService;
@@ -19,90 +18,91 @@ import fi.vm.kapa.xml.rova.api.delegate.RovaDelegatePortType;
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.delegate.RovaDelegatePortType")
 @Component("rovaDelegateService")
 public class DelegateApi extends AbstractSoapService implements RovaDelegatePortType {
-	Logger LOG = Logger.getLogger(DelegateApi.class, Logger.SOAP_SERVICE);
 
-	ObjectFactory factory = new ObjectFactory();
+    Logger LOG = Logger.getLogger(DelegateApi.class, Logger.SOAP_SERVICE);
 
-	@Override
-	public void rovaDelegateService(Holder<Request> request, Holder<Response> response) {
-		// this info is needed for creating a new requestId for logging at the beginning of request chain
-		LOG.info("rovaDelegateService called"); 
+    ObjectFactory factory = new ObjectFactory();
 
-		long startTime = System.currentTimeMillis();
-		
-		dataProvider.handleDelegate(request.value.getDelegateIdentifier(),
-				getService(), getEndUserId(), getRequestId(), response);
-		
-		logDelegateRequest(request, response, startTime, System.currentTimeMillis());
-	}
+    @Override
+    public void rovaDelegateService(Holder<Request> request, Holder<Response> response) {
+        // this info is needed for creating a new requestId for logging at the beginning of request chain
+        LOG.info("rovaDelegateService called");
 
-	private String getEndUserId() {
-		return getHeaderValue(factory.createUserId("").getName());
-	}
-	
-	private String getRequestId() {
-		String clientStr = getClientHeaderValue(factory.createClient(
-				factory.createXRoadClientIdentifierType()).getName(), "/");
-		
-		return clientStr + ";" + getHeaderValue(factory.createId("").getName());
-	}
-		
-	private String getService() {
-		return getClientHeaderValue(factory.createClient(
-				factory.createXRoadClientIdentifierType()).getName(), "_");
-	}
-	
-	private void logDelegateRequest(Holder<Request> request,
-			Holder<Response> response, long startTime, long endTime) {
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append("endUserId=");
-		String endUserId = getEndUserId();
-		if (endUserId.length() == 11) {
-			String birthDayPart = endUserId.substring(0, 6);
-			if (birthDayPart.matches("^\\d+$")) {
-				endUserId = birthDayPart;
-			}
-		}
-		sb.append(endUserId);
-		
-		sb.append(",service=");
-		sb.append(getService());
+        long startTime = System.currentTimeMillis();
 
-		sb.append(",requestId=");
-		sb.append(getRequestId());
+        dataProvider.handleDelegate(request.value.getDelegateIdentifier(),
+                getService(), getEndUserId(), getRequestId(), response);
 
-		if (response.value != null) {
-			sb.append(",auth=");
-			sb.append(response.value.getAuthorization());
-			
-			sb.append(",principalcount=");
-			if (response.value.getPrincipalList() != null && response.value.getPrincipalList().getPrincipal() != null) {
-				sb.append(response.value.getPrincipalList().getPrincipal().size());
-			} else {
-				sb.append("NA");
-			}
-			
-			sb.append(",reasons=[");
-			if (response.value.getReason() != null) {
-				for(Iterator<DecisionReasonType> iter = response.value.getReason().iterator(); iter.hasNext(); ) {
-					DecisionReasonType drt = iter.next();
-					sb.append(drt.getValue());
-					if (iter.hasNext()) {
-						sb.append(",");
-					}
-				}
-			}
-			sb.append("]");
-			
-		} else {
-			sb.append(",no_valid_response,");
-		}
+        logDelegateRequest(request, response, startTime, System.currentTimeMillis());
+    }
 
-		sb.append(",duration=");
-		sb.append(endTime - startTime);
-		
-		LOG.info(sb.toString());
-	}
+    private String getEndUserId() {
+        return getHeaderValue(factory.createUserId("").getName());
+    }
+
+    private String getRequestId() {
+        String clientStr = getClientHeaderValue(factory.createClient(
+                factory.createXRoadClientIdentifierType()).getName(), "/");
+
+        return clientStr + ";" + getHeaderValue(factory.createId("").getName());
+    }
+
+    private String getService() {
+        return getClientHeaderValue(factory.createClient(
+                factory.createXRoadClientIdentifierType()).getName(), "_");
+    }
+
+    private void logDelegateRequest(Holder<Request> request,
+            Holder<Response> response, long startTime, long endTime) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("endUserId=");
+        String endUserId = getEndUserId();
+        if (endUserId.length() == 11) {
+            String birthDayPart = endUserId.substring(0, 6);
+            if (birthDayPart.matches("^\\d+$")) {
+                endUserId = birthDayPart;
+            }
+        }
+        sb.append(endUserId);
+
+        sb.append(",service=");
+        sb.append(getService());
+
+        sb.append(",requestId=");
+        sb.append(getRequestId());
+
+        if (response.value != null) {
+            sb.append(",auth=");
+            sb.append(response.value.getAuthorization());
+
+            sb.append(",principalcount=");
+            if (response.value.getPrincipalList() != null && response.value.getPrincipalList().getPrincipal() != null) {
+                sb.append(response.value.getPrincipalList().getPrincipal().size());
+            } else {
+                sb.append("NA");
+            }
+
+            sb.append(",reasons=[");
+            if (response.value.getReason() != null) {
+                for (Iterator<DecisionReasonType> iter = response.value.getReason().iterator(); iter.hasNext();) {
+                    DecisionReasonType drt = iter.next();
+                    sb.append(drt.getValue());
+                    if (iter.hasNext()) {
+                        sb.append(",");
+                    }
+                }
+            }
+            sb.append("]");
+
+        } else {
+            sb.append(",no_valid_response,");
+        }
+
+        sb.append(",duration=");
+        sb.append(endTime - startTime);
+
+        LOG.info(sb.toString());
+    }
 
 }

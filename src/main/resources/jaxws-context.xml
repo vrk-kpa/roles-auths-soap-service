@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ws="http://jax-ws.dev.java.net/spring/core"
-	xmlns:wss="http://jax-ws.dev.java.net/spring/servlet"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ws="http://jax-ws.dev.java.net/spring/core"
+       xmlns:wss="http://jax-ws.dev.java.net/spring/servlet"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
             http://jax-ws.dev.java.net/spring/core
             http://jax-ws.dev.java.net/spring/core.xsd
             http://jax-ws.dev.java.net/spring/servlet
             http://jax-ws.dev.java.net/spring/servlet.xsd">
 
-	<wss:binding url="/rova/delegate">
-		<wss:service>
-			<ws:service bean="#rovaDelegateService">
-				<ws:handlers>
-					<ref bean="xroadHeaderHandler" />
-				</ws:handlers>
-			</ws:service>
-		</wss:service>
-	</wss:binding>
-	<wss:binding url="/rova/authorization">
-		<wss:service>
-			<ws:service bean="#rovaAuthorizationService">
-				<ws:handlers>
-					<ref bean="xroadHeaderHandler" />
-				</ws:handlers>
-			</ws:service>
-		</wss:service>
-	</wss:binding>
+    <wss:binding url="/rova/delegate">
+        <wss:service>
+            <ws:service bean="#rovaDelegateService">
+                <ws:handlers>
+                    <ref bean="xroadHeaderHandler" />
+                </ws:handlers>
+            </ws:service>
+        </wss:service>
+    </wss:binding>
+    <wss:binding url="/rova/authorization">
+        <wss:service>
+            <ws:service bean="#rovaAuthorizationService">
+                <ws:handlers>
+                    <ref bean="xroadHeaderHandler" />
+                </ws:handlers>
+            </ws:service>
+        </wss:service>
+    </wss:binding>
 </beans>

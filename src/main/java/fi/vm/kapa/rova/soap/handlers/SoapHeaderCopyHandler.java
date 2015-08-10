@@ -20,56 +20,57 @@ import org.springframework.stereotype.Component;
 
 @Component("xroadHeaderHandler")
 public class SoapHeaderCopyHandler implements SOAPHandler<SOAPMessageContext> {
-	public Set<QName> getHeaders() {
-		return Collections.emptySet();
-	}
 
-	public boolean handleMessage(SOAPMessageContext messageContext) {
-		Boolean outboundProperty = (Boolean) messageContext
-				.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-		
-		SOAPMessage soapMsg = messageContext.getMessage();
-		SOAPEnvelope soapEnv;
-		
-		if (!outboundProperty.booleanValue()) {
-			try {
-				soapEnv = soapMsg.getSOAPPart().getEnvelope();
-				SOAPHeader soapHeader = soapEnv.getHeader();
-				List<SOAPHeaderElement> headerList = new ArrayList<SOAPHeaderElement>();
-				@SuppressWarnings("rawtypes")
-				Iterator childs = soapHeader.getChildElements();
-				while (childs.hasNext()) {
-					headerList.add((SOAPHeaderElement)childs.next());
-				}
-				messageContext.put("original-soap-headers", headerList);
-			} catch (SOAPException e) {
-				e.printStackTrace();
-			}
-		} else if (outboundProperty.booleanValue()) {
-			try {
-				soapEnv = soapMsg.getSOAPPart().getEnvelope();
-				if (soapEnv.getHeader() == null) {
-					soapEnv.addHeader();
-				}
-				SOAPHeader header = soapEnv.getHeader();
-				
-				@SuppressWarnings("unchecked")
-				List<SOAPHeaderElement> headerList = (List<SOAPHeaderElement>)messageContext.get("original-soap-headers");
-				for (SOAPHeaderElement h : headerList) {
-					header.addChildElement((h));
-				}
-				soapMsg.saveChanges();
-			} catch (SOAPException e) {
-				e.printStackTrace();
-			}
-		}
-		return true;
-	}
+    public Set<QName> getHeaders() {
+        return Collections.emptySet();
+    }
 
-	public boolean handleFault(SOAPMessageContext messageContext) {
-		return true;
-	}
+    public boolean handleMessage(SOAPMessageContext messageContext) {
+        Boolean outboundProperty = (Boolean) messageContext
+                .get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
-	public void close(MessageContext messageContext) {
-	}
+        SOAPMessage soapMsg = messageContext.getMessage();
+        SOAPEnvelope soapEnv;
+
+        if (!outboundProperty.booleanValue()) {
+            try {
+                soapEnv = soapMsg.getSOAPPart().getEnvelope();
+                SOAPHeader soapHeader = soapEnv.getHeader();
+                List<SOAPHeaderElement> headerList = new ArrayList<SOAPHeaderElement>();
+                @SuppressWarnings("rawtypes")
+                Iterator childs = soapHeader.getChildElements();
+                while (childs.hasNext()) {
+                    headerList.add((SOAPHeaderElement) childs.next());
+                }
+                messageContext.put("original-soap-headers", headerList);
+            } catch (SOAPException e) {
+                e.printStackTrace();
+            }
+        } else if (outboundProperty.booleanValue()) {
+            try {
+                soapEnv = soapMsg.getSOAPPart().getEnvelope();
+                if (soapEnv.getHeader() == null) {
+                    soapEnv.addHeader();
+                }
+                SOAPHeader header = soapEnv.getHeader();
+
+                @SuppressWarnings("unchecked")
+                List<SOAPHeaderElement> headerList = (List<SOAPHeaderElement>) messageContext.get("original-soap-headers");
+                for (SOAPHeaderElement h : headerList) {
+                    header.addChildElement((h));
+                }
+                soapMsg.saveChanges();
+            } catch (SOAPException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+    public boolean handleFault(SOAPMessageContext messageContext) {
+        return true;
+    }
+
+    public void close(MessageContext messageContext) {
+    }
 }

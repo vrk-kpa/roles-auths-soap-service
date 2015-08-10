@@ -7,15 +7,15 @@ import fi.vm.kapa.xml.rova.api.delegate.Response;
 
 public interface DataProvider {
 
-	void handleAuthorization(
-			String delegateId,
-			String principalId,
-			String service,
-			String endUserId,
-			String requestId,
-			Holder<RovaAuthorizationResponse> response);
+    void handleAuthorization(
+            String delegateId,
+            String principalId,
+            String service,
+            String endUserId,
+            String requestId,
+            Holder<RovaAuthorizationResponse> response);
 
-	void handleDelegate(String personId, String service,
-			String endUserId, String requestId,
-			Holder<Response> response);
+    void handleDelegate(String personId, String service,
+            String endUserId, String requestId,
+            Holder<Response> response);
 }
