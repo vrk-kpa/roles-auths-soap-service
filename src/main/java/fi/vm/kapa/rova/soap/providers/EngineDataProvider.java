@@ -49,7 +49,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 	@Override
 	public void handleDelegate(String personId, String service, String endUserId, String requestId,
 			Holder<fi.vm.kapa.xml.rova.api.delegate.Response> delegateResponse) {
-		LOG.info("handleDelegate("+ personId +", "+ service +", "+ endUserId +", "+ requestId +")");
 
 		WebTarget webTarget = getClient().target(engineUrl + "delegate" + "/" + service + "/" 
 				+ endUserId + "/" + personId).queryParam("requestId", requestId);
@@ -91,14 +90,13 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 			}
 		} else {
 			// TODO handle error response
-			LOG.error("Got error response from engine");
+			LOG.error("Got error response from engine: "+ response.getStatus());
 		}
 
 	}
 
 	public void handleAuthorization(String delegateId, String principalId, String service, 
 			String endUserId, String requestId, Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
-		LOG.info("handleAuthorization("+ delegateId +", "+ principalId +", "+ service +", "+ endUserId +", "+ requestId +")");
 
 		WebTarget webTarget = getClient().target(engineUrl + "authorization" + "/" + service 
 				+ "/" + endUserId + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
@@ -123,7 +121,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 			}
 		} else {
 			// TODO handle error response
-			LOG.error("Got error response from engine");
+			LOG.error("Got error response from engine: "+ response.getStatus());
 		}
 	}
 

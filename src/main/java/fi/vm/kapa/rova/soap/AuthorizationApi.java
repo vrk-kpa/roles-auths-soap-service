@@ -24,6 +24,9 @@ public class AuthorizationApi extends AbstractSoapService implements
 
 	@Override
 	public void rovaAuthorizationService(Holder<Request> request, Holder<RovaAuthorizationResponse> response) {
+		// this info is needed for creating a new requestId for logging at the beginning of request chain
+		LOG.info("rovaAuthorizationService called"); 
+
 		long startTime = System.currentTimeMillis();
 
 		dataProvider.handleAuthorization(request.value.getDelegateIdentifier(),
@@ -64,35 +67,17 @@ public class AuthorizationApi extends AbstractSoapService implements
 		}
 		sb.append(endUserId);
 		
-		sb.append(" service=");
+		sb.append(",service=");
 		sb.append(getService());
 
-		sb.append(" requestId=");
+		sb.append(",requestId=");
 		sb.append(getRequestId());
 
-		sb.append(" delegate=");
-		if (request.value != null && request.value.getDelegateIdentifier() != null) {
-			int endIndex = request.value.getDelegateIdentifier().length();
-			endIndex = endIndex > 6 ? 6 : endIndex;
-			sb.append(request.value.getDelegateIdentifier().substring(0, endIndex));
-		} else {
-			sb.append("no_valid_delegate_identifier");
-		}
-
-		sb.append(" principal=");
-		if (request.value != null && request.value.getPrincipalIdentifier() != null) {
-			int endIndex = request.value.getPrincipalIdentifier().length();
-			endIndex = endIndex > 6 ? 6 : endIndex;
-			sb.append(request.value.getPrincipalIdentifier().substring(0, endIndex));
-		} else {
-			sb.append("no_valid_principal_identifier");
-		}
-
 		if (response.value != null) {
-			sb.append(" auth=");
+			sb.append(",auth=");
 			sb.append(response.value.getAuthorization());
 			
-			sb.append(" reasons=[");
+			sb.append(",reasons=[");
 			if (response.value.getReason() != null) {
 				for(Iterator<DecisionReasonType> iter = response.value.getReason().iterator(); iter.hasNext(); ) {
 					DecisionReasonType drt = iter.next();
@@ -102,14 +87,14 @@ public class AuthorizationApi extends AbstractSoapService implements
 					}
 				}
 			}
-			sb.append("] ");
+			sb.append("]");
 
 		} else {
-			sb.append(" no_valid_response ");
+			sb.append(",no_valid_response,");
 		}
 
+		sb.append(",duration=");
 		sb.append(endTime - startTime);
-		sb.append(" ms");
 		
 		LOG.info(sb.toString());
 	}

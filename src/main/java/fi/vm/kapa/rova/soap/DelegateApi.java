@@ -25,6 +25,9 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
 
 	@Override
 	public void rovaDelegateService(Holder<Request> request, Holder<Response> response) {
+		// this info is needed for creating a new requestId for logging at the beginning of request chain
+		LOG.info("rovaDelegateService called"); 
+
 		long startTime = System.currentTimeMillis();
 		
 		dataProvider.handleDelegate(request.value.getDelegateIdentifier(),
@@ -63,43 +66,24 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
 		}
 		sb.append(endUserId);
 		
-		sb.append(" service=");
+		sb.append(",service=");
 		sb.append(getService());
 
-		sb.append(" requestId=");
+		sb.append(",requestId=");
 		sb.append(getRequestId());
 
-		sb.append(" delegate=");
-		if (request.value != null && request.value.getDelegateIdentifier() != null) {
-			int endIndex = request.value.getDelegateIdentifier().length();
-			endIndex = endIndex > 6 ? 6 : endIndex;
-			sb.append(request.value.getDelegateIdentifier().substring(0, endIndex));
-		} else {
-			sb.append("no_valid_delegate_identifier");
-		}
-
 		if (response.value != null) {
-			sb.append(" auth=");
+			sb.append(",auth=");
 			sb.append(response.value.getAuthorization());
 			
-			sb.append(" principals=");
+			sb.append(",principalcount=");
 			if (response.value.getPrincipalList() != null && response.value.getPrincipalList().getPrincipal() != null) {
-				sb.append("[");
-				for (Iterator<PrincipalType> iter = response.value.getPrincipalList().getPrincipal().iterator(); iter.hasNext(); ) {
-					PrincipalType principal = iter.next();
-					if (principal.getIdentifier() != null) {
-						sb.append(principal.getIdentifier().substring(0, 6));
-					} else {
-						sb.append("no_valid_principal_identifier");
-					}
-					if (iter.hasNext()) {
-						sb.append(",");
-					}
-				}
-				sb.append("]");
+				sb.append(response.value.getPrincipalList().getPrincipal().size());
+			} else {
+				sb.append("NA");
 			}
 			
-			sb.append(" reasons=[");
+			sb.append(",reasons=[");
 			if (response.value.getReason() != null) {
 				for(Iterator<DecisionReasonType> iter = response.value.getReason().iterator(); iter.hasNext(); ) {
 					DecisionReasonType drt = iter.next();
@@ -109,14 +93,14 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
 					}
 				}
 			}
-			sb.append("] ");
+			sb.append("]");
 			
 		} else {
-			sb.append(" no_valid_response ");
+			sb.append(",no_valid_response,");
 		}
 
+		sb.append(",duration=");
 		sb.append(endTime - startTime);
-		sb.append(" ms");
 		
 		LOG.info(sb.toString());
 	}
