@@ -12,6 +12,8 @@
         <cxf.version>2.2.3</cxf.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <io.spring.platform-version>1.1.1.RELEASE</io.spring.platform-version>
+        <docker.image.prefix>docker-registry.kapa.ware.fi</docker.image.prefix>
+        <spotify-docker.version>0.2.9</spotify-docker.version>
     </properties>
 
     <dependencyManagement>
@@ -255,6 +257,15 @@
                     <descriptors>
                         <descriptor>assembly.xml</descriptor>
                     </descriptors>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${spotify-docker.version}</version>
+                <configuration>
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <dockerDirectory>.</dockerDirectory>
                 </configuration>
             </plugin>
         </plugins>
