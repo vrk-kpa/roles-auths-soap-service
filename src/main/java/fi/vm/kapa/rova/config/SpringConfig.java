@@ -11,8 +11,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @ImportResource("applicationContext.xml")
 @PropertySources(value = {
     @PropertySource("classpath:application.properties"),
-    @PropertySource(value = "classpath:developer.properties", ignoreResourceNotFound = true),
-    @PropertySource(value = "file:/opt/www/roles-auths-soap-service/config/service.properties", ignoreResourceNotFound = true)})
+    @PropertySource(value = "file:/opt/rova/roles-auths-soap-service/config/service.properties", ignoreResourceNotFound = true)})
 public class SpringConfig {
 
     @Bean
