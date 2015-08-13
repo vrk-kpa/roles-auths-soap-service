@@ -12,21 +12,8 @@
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>service.properties.template</include>
-                <include>start.sh</include>
-                <include>stop.sh</include>
-                <include>restart.sh</include>
-                <include>service.properties.template</include>
+                <include>logback.xml.template</include>
             </includes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}</directory>
-            <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>*.war</include>
-            </includes>
-            <excludes>
-                <exclude>*.zip</exclude>
-            </excludes>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/site</directory>
