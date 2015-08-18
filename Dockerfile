@@ -32,4 +32,4 @@ ADD target/roles-auths-soap-service.jar /opt/rova/roles-auths-soap-service/
 WORKDIR /opt/rova/roles-auths-soap-service/
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-Dlogback.configurationFile=config/logback.xml", "-jar", "roles-auths-soap-service.jar"]
+ENTRYPOINT ["java", "-Dlogging.config=config/logback.xml", "-jar", "roles-auths-soap-service.jar"]
