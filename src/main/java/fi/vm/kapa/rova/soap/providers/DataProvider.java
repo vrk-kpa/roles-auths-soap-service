@@ -18,4 +18,8 @@ public interface DataProvider {
     void handleDelegate(String personId, String service,
             String endUserId, String requestId,
             Holder<Response> response);
+    
+    void handleOrganizationalRoles(String personId, String service,
+            String endUserId, String requestId,
+            Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> response);
 }

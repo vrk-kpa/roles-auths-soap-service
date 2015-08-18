@@ -36,7 +36,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
     private fi.vm.kapa.xml.rova.api.authorization.ObjectFactory authorizationFactory = new fi.vm.kapa.xml.rova.api.authorization.ObjectFactory();
     private fi.vm.kapa.xml.rova.api.delegate.ObjectFactory delegateFactory = new fi.vm.kapa.xml.rova.api.delegate.ObjectFactory();
-
+   
+    
     @Value(ENGINE_URL)
     private String engineUrl;
 
@@ -125,6 +126,13 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         }
     }
 
+    public void handleOrganizationalRoles(String personId, String service,
+            String endUserId, String requestId,
+            Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> responseHolder) {
+        
+        
+    }
+    
     private Client getClient() {
         ClientConfig clientConfig = new ClientConfig();
         Client client = ClientBuilder.newClient(clientConfig);
