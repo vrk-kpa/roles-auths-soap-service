@@ -27,4 +27,13 @@
             </ws:service>
         </wss:service>
     </wss:binding>
+    <wss:binding url="/rova/OrganizationalRoles">
+        <wss:service>
+            <ws:service bean="#rovaOrganizationalRolesService">
+                <ws:handlers>
+                    <ref bean="xroadHeaderHandler" />
+                </ws:handlers>
+            </ws:service>
+        </wss:service>
+    </wss:binding>
 </beans>

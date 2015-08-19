@@ -247,6 +247,22 @@
                             <verbose>true</verbose>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>orgroles</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <XadditionalHeaders>true</XadditionalHeaders>
+                            <packageName>fi.vm.kapa.xml.rova.api.orgroles</packageName>
+                            <wsdlLocation>../../../../../../../wsdl/orgroles.wsdl</wsdlLocation>
+                            <wsdlUrls>
+                                <wsdlUrl>${basedir}/src/main/resources/wsdl/orgroles.wsdl</wsdlUrl>
+                            </wsdlUrls>
+                            <verbose>true</verbose>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
