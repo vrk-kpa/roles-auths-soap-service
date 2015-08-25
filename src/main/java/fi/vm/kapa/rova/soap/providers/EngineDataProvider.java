@@ -51,7 +51,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     public void handleDelegate(String personId, String service, String endUserId, String requestId,
             Holder<fi.vm.kapa.xml.rova.api.delegate.Response> delegateResponse) {
 
-        WebTarget webTarget = getClient().target(engineUrl + "delegate" + "/" + service + "/"
+        WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/" + service + "/"
                 + endUserId + "/" + personId).queryParam("requestId", requestId);
 
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
@@ -99,7 +99,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     public void handleAuthorization(String delegateId, String principalId, String service,
             String endUserId, String requestId, Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
 
-        WebTarget webTarget = getClient().target(engineUrl + "authorization" + "/" + service
+        WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/" + service
                 + "/" + endUserId + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
 
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
