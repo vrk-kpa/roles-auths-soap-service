@@ -1,5 +1,7 @@
 package fi.vm.kapa.rova.soap.providers;
 
+import java.util.List;
+
 import javax.xml.ws.Holder;
 
 import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
@@ -19,4 +21,9 @@ public interface DataProvider {
     void handleDelegate(String personId, String service,
             String endUserId, String requestId,
             Holder<Response> response);
+    
+    void handleOrganizationalRoles(String personId, List<String> organizationIds, String service,
+            String endUserId, String requestId,
+            Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> response);
+    
 }

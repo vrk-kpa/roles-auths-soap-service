@@ -13,7 +13,7 @@ import fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType")
 @Component("rovaOrganizationalRolesService")
-public class OrganizationalRolesApi extends AbstractOrgSoapService implements RovaOrganizationalRolesPortType {
+public class OrganizationalRolesApi extends AbstractSoapService implements RovaOrganizationalRolesPortType {
 
     Logger LOG = Logger.getLogger(OrganizationalRolesApi.class, Logger.SOAP_SERVICE);
 
@@ -31,7 +31,7 @@ public class OrganizationalRolesApi extends AbstractOrgSoapService implements Ro
                 getService(), getEndUserId(), 
                 getRequestId(), response);
 
-        logDelegateRequest(request, response, startTime, System.currentTimeMillis());
+        logRolesRequest(request, response, startTime, System.currentTimeMillis());
     }
 
     private String getEndUserId() {
@@ -50,7 +50,7 @@ public class OrganizationalRolesApi extends AbstractOrgSoapService implements Ro
                 factory.createXRoadClientIdentifierType()).getName(), "_");
     }
 
-    private void logDelegateRequest(Holder<Request> request,
+    private void logRolesRequest(Holder<Request> request,
             Holder<Response> response, long startTime, long endTime) {
         StringBuilder sb = new StringBuilder();
 

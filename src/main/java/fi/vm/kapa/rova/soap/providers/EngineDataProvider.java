@@ -1,11 +1,14 @@
 package fi.vm.kapa.rova.soap.providers;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.Holder;
@@ -16,10 +19,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import fi.vm.kapa.rova.admin.model.RuleDTO;
 import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.model.Authorization;
 import fi.vm.kapa.rova.engine.model.DecisionReason;
 import fi.vm.kapa.rova.engine.model.Delegate;
+import fi.vm.kapa.rova.engine.model.OrganizationResult;
+import fi.vm.kapa.rova.engine.model.OrganizationType;
+import fi.vm.kapa.rova.engine.model.OrganizationalRole;
+import fi.vm.kapa.rova.engine.model.ResultRoleType;
+import fi.vm.kapa.rova.engine.model.RoleNameType;
+import fi.vm.kapa.rova.engine.model.RoleType;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
 import fi.vm.kapa.rova.rest.validation.ValidationClientRequestFilter;
@@ -28,6 +38,9 @@ import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
 import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
 import fi.vm.kapa.xml.rova.api.delegate.Principal;
 import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
+import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
+import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
+import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
 
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
@@ -36,6 +49,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
     private fi.vm.kapa.xml.rova.api.authorization.ObjectFactory authorizationFactory = new fi.vm.kapa.xml.rova.api.authorization.ObjectFactory();
     private fi.vm.kapa.xml.rova.api.delegate.ObjectFactory delegateFactory = new fi.vm.kapa.xml.rova.api.delegate.ObjectFactory();
+    private fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory organizationalRolesFactory = new fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory();
    
     
     @Value(ENGINE_URL)
@@ -126,10 +140,64 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         }
     }
 
-    public void handleOrganizationalRoles(String personId, String service,
+    @Override
+    public void handleOrganizationalRoles(String personId, List<String> organizationIds, String service,
             String endUserId, String requestId,
-            Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> responseHolder) {
+            Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
         
+//        System.out.println("EngineDataProvider.handleOrganizationalRoles()");
+
+        String orgIds = "";
+        if (organizationIds != null) {
+            for (Iterator<String> iterator = organizationIds.iterator(); iterator.hasNext();) {
+                orgIds += iterator.next();
+                if (iterator.hasNext()) {
+                    orgIds += ";";
+                }
+            }
+        }
+
+        WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + service + "/"
+                + endUserId + "/" + personId).queryParam("requestId", requestId).queryParam("organizationIds", orgIds);
+
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+
+        Response response = invocationBuilder.get();
+
+        if (response.getStatus() == HttpStatus.OK.value()) {
+            Set<OrganizationResult> roles = response.readEntity(new GenericType<Set<OrganizationResult>>() {});
+//            System.out.println("XXXXXXXXXXXXXXXXXXXXX "+ roles);
+            
+            OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
+            List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
+
+            if (roles != null) {
+                for (OrganizationResult organizationResult : roles) {
+                    OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType(); 
+                    fi.vm.kapa.xml.rova.api.orgroles.OrganizationType organizationType = organizationalRolesFactory.createOrganizationType();
+                    organizationType.setName(organizationResult.getName());
+                    organizationType.setOrganizationIdentifier(organizationResult.getIdentifier());
+                    ort.setOrganization(organizationType);
+                    RoleList roleList = organizationalRolesFactory.createRoleList();
+                    for (ResultRoleType rt : organizationResult.getRoles()) {
+                        roleList.getRole().add(rt.toString());
+                    }
+                    ort.setRoles(roleList);
+                    organizationalRoles.add(ort);
+                }
+            } else {
+                OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType(); 
+                RoleList roleList = organizationalRolesFactory.createRoleList();
+                ort.setRoles(roleList);
+                organizationalRoles.add(ort);
+            }
+            
+            rolesResponseHolder.value = organizationalRolesFactory.createResponse();
+            rolesResponseHolder.value.setOrganizationList(organizationListType);
+        } else {
+            // TODO handle error response
+            LOG.error("Got error response from engine: " + response.getStatus());
+        }
         
     }
     
