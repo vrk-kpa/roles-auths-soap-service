@@ -32,6 +32,7 @@ import fi.vm.kapa.rova.engine.model.RoleNameType;
 import fi.vm.kapa.rova.engine.model.RoleType;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
+import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
 import fi.vm.kapa.rova.rest.validation.ValidationClientRequestFilter;
 import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
 import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
@@ -67,7 +68,9 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
         WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/" + service + "/"
                 + endUserId + "/" + personId).queryParam("requestId", requestId);
-
+        
+        webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
+       
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
         Response response = invocationBuilder.get();
@@ -115,7 +118,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
         WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/" + service
                 + "/" + endUserId + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
-
+        
+        webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
         Response response = invocationBuilder.get();
@@ -160,6 +164,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + service + "/"
                 + endUserId + "/" + personId).queryParam("requestId", requestId).queryParam("organizationIds", orgIds);
 
+        
+        webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
         Response response = invocationBuilder.get();
