@@ -15,7 +15,7 @@ import fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType;
 @Component("rovaOrganizationalRolesService")
 public class OrganizationalRolesApi extends AbstractSoapService implements RovaOrganizationalRolesPortType {
 
-    Logger LOG = Logger.getLogger(OrganizationalRolesApi.class, Logger.SOAP_SERVICE);
+    Logger LOG = Logger.getLogger(OrganizationalRolesApi.class);
 
     ObjectFactory factory = new ObjectFactory();
 

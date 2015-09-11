@@ -19,17 +19,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import fi.vm.kapa.rova.admin.model.RuleDTO;
 import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.model.Authorization;
 import fi.vm.kapa.rova.engine.model.DecisionReason;
 import fi.vm.kapa.rova.engine.model.Delegate;
 import fi.vm.kapa.rova.engine.model.OrganizationResult;
-import fi.vm.kapa.rova.engine.model.OrganizationType;
-import fi.vm.kapa.rova.engine.model.OrganizationalRole;
 import fi.vm.kapa.rova.engine.model.ResultRoleType;
-import fi.vm.kapa.rova.engine.model.RoleNameType;
-import fi.vm.kapa.rova.engine.model.RoleType;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
 import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
@@ -46,7 +41,7 @@ import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
 
-    Logger LOG = Logger.getLogger(EngineDataProvider.class, Logger.SOAP_SERVICE);
+    Logger LOG = Logger.getLogger(EngineDataProvider.class);
 
     private fi.vm.kapa.xml.rova.api.authorization.ObjectFactory authorizationFactory = new fi.vm.kapa.xml.rova.api.authorization.ObjectFactory();
     private fi.vm.kapa.xml.rova.api.delegate.ObjectFactory delegateFactory = new fi.vm.kapa.xml.rova.api.delegate.ObjectFactory();

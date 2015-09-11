@@ -19,7 +19,7 @@ import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
 public class AuthorizationApi extends AbstractSoapService implements
         RovaAuthorizationPortType {
 
-    Logger LOG = Logger.getLogger(AuthorizationApi.class, Logger.SOAP_SERVICE);
+    Logger LOG = Logger.getLogger(AuthorizationApi.class);
 
     private ObjectFactory factory = new ObjectFactory();
 

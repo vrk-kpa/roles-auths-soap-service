@@ -20,7 +20,7 @@ import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
 @Component
 public class OrganizationEngineDataProvider implements OrganizationDataProvider, SpringProperties {
 
-    Logger LOG = Logger.getLogger(OrganizationEngineDataProvider.class, Logger.SOAP_SERVICE);
+    Logger LOG = Logger.getLogger(OrganizationEngineDataProvider.class);
 
     private static fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory organizationalRolesFactory = new fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory();
     

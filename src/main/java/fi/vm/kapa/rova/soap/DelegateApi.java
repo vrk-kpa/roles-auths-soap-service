@@ -19,7 +19,7 @@ import fi.vm.kapa.xml.rova.api.delegate.RovaDelegatePortType;
 @Component("rovaDelegateService")
 public class DelegateApi extends AbstractSoapService implements RovaDelegatePortType {
 
-    Logger LOG = Logger.getLogger(DelegateApi.class, Logger.SOAP_SERVICE);
+    Logger LOG = Logger.getLogger(DelegateApi.class);
 
     ObjectFactory factory = new ObjectFactory();
 

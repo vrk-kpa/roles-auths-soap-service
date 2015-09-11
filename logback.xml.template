@@ -12,7 +12,9 @@
         <!-- port>5514</port -->
         <port>{{ logstash_port }}</port>
         <!-- encoder is required -->
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"component":"Soap-registry"}</customFields>
+        </encoder>
     </appender>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
