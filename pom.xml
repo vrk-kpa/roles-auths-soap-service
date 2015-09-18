@@ -222,7 +222,6 @@
                             <goal>wsimport</goal>
                         </goals>
                         <configuration>
-                            <XadditionalHeaders>true</XadditionalHeaders>
                             <packageName>fi.vm.kapa.xml.rova.api.delegate</packageName>
                             <wsdlLocation>../../../../../../../wsdl/delegate.wsdl</wsdlLocation>
                             <wsdlUrls>
@@ -238,7 +237,6 @@
                             <goal>wsimport</goal>
                         </goals>
                         <configuration>
-                            <XadditionalHeaders>true</XadditionalHeaders>
                             <packageName>fi.vm.kapa.xml.rova.api.authorization</packageName>
                             <wsdlLocation>../../../../../../../wsdl/authorization.wsdl</wsdlLocation>
                             <wsdlUrls>
@@ -254,7 +252,6 @@
                             <goal>wsimport</goal>
                         </goals>
                         <configuration>
-                            <XadditionalHeaders>true</XadditionalHeaders>
                             <packageName>fi.vm.kapa.xml.rova.api.orgroles</packageName>
                             <wsdlLocation>../../../../../../../wsdl/orgroles.wsdl</wsdlLocation>
                             <wsdlUrls>
