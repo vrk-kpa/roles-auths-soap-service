@@ -1,10 +1,15 @@
 package fi.vm.kapa.rova.soap;
 
+import static fi.vm.kapa.rova.logging.Logger.Field.*;
+import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
+
 import java.util.Iterator;
 
 import javax.jws.WebService;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.Holder;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.vm.kapa.rova.logging.Logger;
@@ -16,10 +21,11 @@ import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationPortType")
 @Component("rovaAuthorizationService")
-public class AuthorizationApi extends AbstractSoapService implements
-        RovaAuthorizationPortType {
-
-    Logger LOG = Logger.getLogger(AuthorizationApi.class);
+public class AuthorizationApi extends AbstractSoapService implements RovaAuthorizationPortType {
+    private static final Logger LOG = Logger.getLogger(AuthorizationApi.class);
+    
+    @Autowired
+    private HttpServletRequest httpReq;
 
     private ObjectFactory factory = new ObjectFactory();
 
@@ -56,47 +62,33 @@ public class AuthorizationApi extends AbstractSoapService implements
 
     private void logAuthorizationRequest(Holder<Request> request,
             Holder<RovaAuthorizationResponse> response, long startTime, long endTime) {
-        StringBuilder sb = new StringBuilder();
 
-        sb.append("endUserId=");
-        String endUserId = getEndUserId();
-        if (endUserId.length() == 11) {
-            String birthDayPart = endUserId.substring(0, 6);
-            if (birthDayPart.matches("^\\d+$")) {
-                endUserId = birthDayPart;
-            }
-        }
-        sb.append(endUserId);
-
-        sb.append(",service=");
-        sb.append(getService());
-
-        sb.append(",requestId=");
-        sb.append(getRequestId());
-
+        Logger.LogMap logMap = LOG.infoMap();
+        
+        logMap.add(ENDUSER, getEndUserId());
+        logMap.add(SERVICEREQUEST, getRequestId());
+        logMap.add(DURATION, Long.toString(endTime - startTime));
+        
         if (response.value != null) {
-            sb.append(",auth=");
-            sb.append(response.value.getAuthorization());
-
-            sb.append(",reasons=[");
+            logMap.add(AUTH, response.value.getAuthorization().toString());
+            
             if (response.value.getReason() != null) {
+                StringBuilder rb = new StringBuilder();
                 for (Iterator<DecisionReasonType> iter = response.value.getReason().iterator(); iter.hasNext();) {
                     DecisionReasonType drt = iter.next();
-                    sb.append(drt.getValue());
+                    rb.append(drt.getValue());
                     if (iter.hasNext()) {
-                        sb.append(",");
+                        rb.append(",");
                     }
                 }
+                logMap.add(REASONS, rb.toString());
             }
-            sb.append("]");
-
+            
         } else {
-            sb.append(",no_valid_response,");
+            logMap.add(AUTH, "no_valid_response");
+            logMap.level(ERROR);
         }
 
-        sb.append(",duration=");
-        sb.append(endTime - startTime);
-
-        LOG.info(sb.toString());
+        logMap.log();
     }
 }

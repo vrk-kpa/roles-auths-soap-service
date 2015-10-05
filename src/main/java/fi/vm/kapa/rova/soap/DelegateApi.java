@@ -1,5 +1,8 @@
 package fi.vm.kapa.rova.soap;
 
+import static fi.vm.kapa.rova.logging.Logger.Field.*;
+import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
+
 import java.util.Iterator;
 
 import javax.jws.WebService;
@@ -10,7 +13,6 @@ import org.springframework.stereotype.Component;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType;
 import fi.vm.kapa.xml.rova.api.delegate.ObjectFactory;
-import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 import fi.vm.kapa.xml.rova.api.delegate.Request;
 import fi.vm.kapa.xml.rova.api.delegate.Response;
 import fi.vm.kapa.xml.rova.api.delegate.RovaDelegatePortType;
@@ -54,55 +56,39 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
 
     private void logDelegateRequest(Holder<Request> request,
             Holder<Response> response, long startTime, long endTime) {
-        StringBuilder sb = new StringBuilder();
 
-        sb.append("endUserId=");
-        String endUserId = getEndUserId();
-        if (endUserId.length() == 11) {
-            String birthDayPart = endUserId.substring(0, 6);
-            if (birthDayPart.matches("^\\d+$")) {
-                endUserId = birthDayPart;
-            }
-        }
-        sb.append(endUserId);
-
-        sb.append(",service=");
-        sb.append(getService());
-
-        sb.append(",requestId=");
-        sb.append(getRequestId());
-
+        Logger.LogMap logMap = LOG.infoMap();
+        
+        logMap.add(ENDUSER, getEndUserId());
+        logMap.add(SERVICEREQUEST, getRequestId());
+        logMap.add(DURATION, Long.toString(endTime - startTime));
+        
         if (response.value != null) {
-            sb.append(",auth=");
-            sb.append(response.value.getAuthorization());
-
-            sb.append(",principalcount=");
+            logMap.add(AUTH, response.value.getAuthorization() != null ? response.value.getAuthorization().toString() : "null");
+            
             if (response.value.getPrincipalList() != null && response.value.getPrincipalList().getPrincipal() != null) {
-                sb.append(response.value.getPrincipalList().getPrincipal().size());
+                logMap.add(PRCOUNT, response.value.getPrincipalList().getPrincipal().size());
             } else {
-                sb.append("NA");
+                logMap.add(PRCOUNT, "-1");
             }
-
-            sb.append(",reasons=[");
+            
             if (response.value.getReason() != null) {
+                StringBuilder rb = new StringBuilder();
                 for (Iterator<DecisionReasonType> iter = response.value.getReason().iterator(); iter.hasNext();) {
                     DecisionReasonType drt = iter.next();
-                    sb.append(drt.getValue());
+                    rb.append(drt.getValue());
                     if (iter.hasNext()) {
-                        sb.append(",");
+                        rb.append(",");
                     }
                 }
+                logMap.add(REASONS, rb.toString());
             }
-            sb.append("]");
-
+            
         } else {
-            sb.append(",no_valid_response,");
+            logMap.add(AUTH, "no_valid_response");
+            logMap.level(ERROR);
         }
 
-        sb.append(",duration=");
-        sb.append(endTime - startTime);
-
-        LOG.info(sb.toString());
+        logMap.log();
     }
-
 }
