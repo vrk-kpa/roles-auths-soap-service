@@ -4,15 +4,15 @@ import static fi.vm.kapa.rova.logging.Logger.Field.*;
 import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
 
 import java.util.Iterator;
+import fi.vm.kapa.rova.logging.Logger;
+import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.Holder;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
 import fi.vm.kapa.xml.rova.api.authorization.ObjectFactory;
 import fi.vm.kapa.xml.rova.api.authorization.Request;

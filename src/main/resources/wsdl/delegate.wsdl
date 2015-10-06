@@ -64,6 +64,8 @@
                     <xsd:element name="authorization" type="items:AuthorizationType" />
                     <xsd:element name="reason" maxOccurs="unbounded"
                                  minOccurs="0" nillable="true" type="tns:DecisionReasonType" />
+                    <xsd:element name="exceptionMessage" maxOccurs="1"
+                                 minOccurs="0" nillable="true" type="xsd:string" />
                 </xsd:sequence>
             </xsd:complexType>
 

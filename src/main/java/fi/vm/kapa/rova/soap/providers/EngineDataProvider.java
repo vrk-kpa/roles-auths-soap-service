@@ -1,30 +1,7 @@
 package fi.vm.kapa.rova.soap.providers;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.ws.Holder;
-
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
 import fi.vm.kapa.rova.config.SpringProperties;
-import fi.vm.kapa.rova.engine.model.Authorization;
-import fi.vm.kapa.rova.engine.model.DecisionReason;
-import fi.vm.kapa.rova.engine.model.Delegate;
-import fi.vm.kapa.rova.engine.model.OrganizationResult;
-import fi.vm.kapa.rova.engine.model.ResultRoleType;
+import fi.vm.kapa.rova.engine.model.*;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
 import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
@@ -37,6 +14,21 @@ import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.ws.Holder;
+import java.util.*;
 
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
@@ -102,7 +94,9 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                         fi.vm.kapa.xml.rova.api.delegate.AuthorizationType.valueOf(delegate.getAuthorizationType().toString()));
             }
         } else {
-            // TODO handle error response
+            delegateResponse.value = delegateFactory.createResponse();
+            delegateResponse.value.setExceptionMessage(delegateFactory
+                    .createResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
         }
 
@@ -134,7 +128,9 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                 }
             }
         } else {
-            // TODO handle error response
+            authorizationResponseHolder.value = authorizationFactory.createRovaAuthorizationResponse();
+            authorizationResponseHolder.value.setExceptionMessage(authorizationFactory
+                    .createRovaAuthorizationResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
         }
     }
@@ -144,8 +140,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             String endUserId, String requestId,
             Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
         
-//        System.out.println("EngineDataProvider.handleOrganizationalRoles()");
-
         String orgIds = "";
         if (organizationIds != null) {
             for (Iterator<String> iterator = organizationIds.iterator(); iterator.hasNext();) {
@@ -167,8 +161,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
         if (response.getStatus() == HttpStatus.OK.value()) {
             Set<OrganizationResult> roles = response.readEntity(new GenericType<Set<OrganizationResult>>() {});
-//            System.out.println("XXXXXXXXXXXXXXXXXXXXX "+ roles);
-            
+
             OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
             List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
 
@@ -196,12 +189,27 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             rolesResponseHolder.value = organizationalRolesFactory.createResponse();
             rolesResponseHolder.value.setOrganizationList(organizationListType);
         } else {
-            // TODO handle error response
+            rolesResponseHolder.value = organizationalRolesFactory.createResponse();
+            rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory
+                    .createResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
         }
         
     }
-    
+
+    private String createExceptionMessage(Response response) {
+        Object entity = response.readEntity(Object.class);
+        String reqId = "NO_SESSION";
+        if (entity != null && Map.class.isAssignableFrom(entity.getClass())) {
+            reqId = (String) ((Map)entity).get("ReqID");
+        }
+        return new StringBuilder("RequestId: ").append(reqId)
+                .append(", Date: ").append(response.getDate())
+                .append(", Status: ").append(response.getStatusInfo().getStatusCode())
+                .append(" ").append(response.getStatusInfo().getReasonPhrase()).toString();
+    }
+
+
     private Client getClient() {
         ClientConfig clientConfig = new ClientConfig();
         Client client = ClientBuilder.newClient(clientConfig);
