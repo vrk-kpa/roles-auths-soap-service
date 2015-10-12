@@ -45,7 +45,7 @@
             <xsd:complexType name="OrganizationType">
                 <xsd:sequence>
                     <xsd:element name="organizationIdentifier" type="xsd:string" />
-                    <xsd:element name="name" type="xsd:string" />
+                    <xsd:element name="name" nillable="true" type="xsd:string" />
                 </xsd:sequence>
             </xsd:complexType>
             
@@ -59,7 +59,7 @@
             <xsd:complexType name="OrganizationalRolesType">
                 <xsd:sequence>
                     <xsd:element name="organization" type="tns:OrganizationType" />
-                    <xsd:element name="roles" type="tns:RoleList" />
+                    <xsd:element name="roles" nillable="true" type="tns:RoleList" />
                 </xsd:sequence>
             </xsd:complexType>
 

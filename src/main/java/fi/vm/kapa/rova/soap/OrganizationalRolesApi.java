@@ -11,6 +11,10 @@ import fi.vm.kapa.xml.rova.api.orgroles.Request;
 import fi.vm.kapa.xml.rova.api.orgroles.Response;
 import fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType;
 
+import static fi.vm.kapa.rova.logging.Logger.Field.DURATION;
+import static fi.vm.kapa.rova.logging.Logger.Field.END_USER;
+import static fi.vm.kapa.rova.logging.Logger.Field.SERVICE_REQUEST_IDENTIFIER;
+
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType")
 @Component("rovaOrganizationalRolesService")
 public class OrganizationalRolesApi extends AbstractSoapService implements RovaOrganizationalRolesPortType {
@@ -54,15 +58,11 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
             Holder<Response> response, long startTime, long endTime) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("endUserId=");
-        String endUserId = getEndUserId();
-        if (endUserId.length() == 11) {
-            String birthDayPart = endUserId.substring(0, 6);
-            if (birthDayPart.matches("^\\d+$")) {
-                endUserId = birthDayPart;
-            }
-        }
-        sb.append(endUserId);
+        Logger.LogMap logMap = LOG.infoMap();
+
+        logMap.add(END_USER, getEndUserId());
+        logMap.add(SERVICE_REQUEST_IDENTIFIER, getRequestId());
+        logMap.add(DURATION, Long.toString(endTime - startTime));
 
         sb.append(",service=");
         sb.append(getService());
