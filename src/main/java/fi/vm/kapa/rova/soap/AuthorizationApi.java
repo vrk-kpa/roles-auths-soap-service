@@ -66,6 +66,7 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
         Logger.LogMap logMap = LOG.infoMap();
         
         logMap.add(END_USER, getEndUserId());
+        logMap.add(SERVICE_ID, getService());
         logMap.add(SERVICE_REQUEST_IDENTIFIER, getRequestId());
         logMap.add(DURATION, Long.toString(endTime - startTime));
         
