@@ -23,8 +23,7 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
 
     @Override
     public void rovaOrganizationalRolesService(Holder<Request> request, Holder<Response> response) {
-        // this info is needed for creating a new requestId for logging at the beginning of request chain
-        LOG.info("rovaOrganizationalRolesService called");
+        LOG.info("Organizational Roles request received");
 
         long startTime = System.currentTimeMillis();
 

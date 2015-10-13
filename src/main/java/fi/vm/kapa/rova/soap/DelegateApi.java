@@ -27,8 +27,7 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
 
     @Override
     public void rovaDelegateService(Holder<Request> request, Holder<Response> response) {
-        // this info is needed for creating a new requestId for logging at the beginning of request chain
-        LOG.info("rovaDelegateService called");
+        LOG.info("Delegate request received");
 
         long startTime = System.currentTimeMillis();
 

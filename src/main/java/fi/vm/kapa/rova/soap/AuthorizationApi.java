@@ -31,9 +31,7 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
 
     @Override
     public void rovaAuthorizationService(Holder<Request> request, Holder<RovaAuthorizationResponse> response) {
-        // this info is needed for creating a new requestId for logging at the beginning of request chain
-        LOG.info("rovaAuthorizationService called");
-
+        LOG.info("Authorization request received");
         long startTime = System.currentTimeMillis();
 
         dataProvider.handleAuthorization(request.value.getDelegateIdentifier(),
