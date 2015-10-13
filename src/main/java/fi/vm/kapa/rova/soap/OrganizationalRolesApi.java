@@ -12,6 +12,7 @@ import fi.vm.kapa.xml.rova.api.orgroles.Response;
 import fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType;
 
 import static fi.vm.kapa.rova.logging.Logger.Field.*;
+import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType")
 @Component("rovaOrganizationalRolesService")
@@ -62,23 +63,13 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
         logMap.add(SERVICE_REQUEST_IDENTIFIER, getRequestId());
         logMap.add(DURATION, Long.toString(endTime - startTime));
 
-        sb.append(",service=");
-        sb.append(getService());
-
-        sb.append(",requestId=");
-        sb.append(getRequestId());
-
         if (response.value != null) {
-            sb.append(",auth=");
-            sb.append(response.value.getOrganizationList());
+            logMap.add(RESULT, response.value.getOrganizationList());
         } else {
-            sb.append(",no_valid_response,");
+            logMap.add(RESULT, "no_valid_response");
+            logMap.level(ERROR);
         }
-
-        sb.append(",duration=");
-        sb.append(endTime - startTime);
-
-        LOG.info(sb.toString());
+        logMap.log();
     }
 
 }

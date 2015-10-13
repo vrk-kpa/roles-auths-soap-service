@@ -69,7 +69,7 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
         logMap.add(DURATION, Long.toString(endTime - startTime));
         
         if (response.value != null) {
-            logMap.add(AUTHORIZATION_RESULT, response.value.getAuthorization().toString());
+            logMap.add(RESULT, response.value.getAuthorization().toString());
             
             if (response.value.getReason() != null) {
                 StringBuilder rb = new StringBuilder();
@@ -84,7 +84,7 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
             }
             
         } else {
-            logMap.add(AUTHORIZATION_RESULT, "no_valid_response");
+            logMap.add(RESULT, "no_valid_response");
             logMap.level(ERROR);
         }
 

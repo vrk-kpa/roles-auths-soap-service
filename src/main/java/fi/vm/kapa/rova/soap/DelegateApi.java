@@ -64,7 +64,7 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
         logMap.add(DURATION, Long.toString(endTime - startTime));
         
         if (response.value != null) {
-            logMap.add(AUTHORIZATION_RESULT, response.value.getAuthorization() != null ? response.value.getAuthorization().toString() : "null");
+            logMap.add(RESULT, response.value.getAuthorization() != null ? response.value.getAuthorization().toString() : "null");
             
             if (response.value.getPrincipalList() != null && response.value.getPrincipalList().getPrincipal() != null) {
                 logMap.add(PRINCIPAL_COUNT, response.value.getPrincipalList().getPrincipal().size());
@@ -85,7 +85,7 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
             }
             
         } else {
-            logMap.add(AUTHORIZATION_RESULT, "no_valid_response");
+            logMap.add(RESULT, "no_valid_response");
             logMap.level(ERROR);
         }
 
