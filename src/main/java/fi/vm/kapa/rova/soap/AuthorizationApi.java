@@ -1,23 +1,17 @@
 package fi.vm.kapa.rova.soap;
 
-import static fi.vm.kapa.rova.logging.Logger.Field.*;
-import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
-
-import java.util.Iterator;
 import fi.vm.kapa.rova.logging.Logger;
+import fi.vm.kapa.xml.rova.api.authorization.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.Holder;
+import java.util.Iterator;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
-import fi.vm.kapa.xml.rova.api.authorization.ObjectFactory;
-import fi.vm.kapa.xml.rova.api.authorization.Request;
-import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationPortType;
-import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
+import static fi.vm.kapa.rova.logging.Logger.Field.*;
+import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationPortType")
 @Component("rovaAuthorizationService")
@@ -69,8 +63,11 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
         logMap.add(DURATION, Long.toString(endTime - startTime));
         
         if (response.value != null) {
-            logMap.add(RESULT, response.value.getAuthorization().toString());
-            
+            String auth = response.value.getAuthorization() != null
+                    ? response.value.getAuthorization().toString()
+                    : "NA";
+            logMap.add(RESULT, auth);
+
             if (response.value.getReason() != null) {
                 StringBuilder rb = new StringBuilder();
                 for (Iterator<DecisionReasonType> iter = response.value.getReason().iterator(); iter.hasNext();) {

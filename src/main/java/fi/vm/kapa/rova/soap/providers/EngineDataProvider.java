@@ -28,7 +28,12 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.Holder;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
@@ -193,17 +198,26 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     }
 
     private String createExceptionMessage(Response response) {
-        Object entity = response.readEntity(Object.class);
-        String reqId = "NO_SESSION";
-        if (entity != null && Map.class.isAssignableFrom(entity.getClass())) {
-            reqId = (String) ((Map)entity).get("ReqID");
-        }
-        return new StringBuilder("RequestId: ").append(reqId)
+
+        return new StringBuilder("RequestId: ").append(getRequestId(response))
                 .append(", Date: ").append(response.getDate())
                 .append(", Status: ").append(response.getStatusInfo().getStatusCode())
                 .append(" ").append(response.getStatusInfo().getReasonPhrase()).toString();
     }
 
+    protected String getRequestId(Response response) {
+        Object entity = null;
+        String reqId = "NO_SESSION";
+        if (response.hasEntity()) {
+            LOG.error("Response mediatype: "+response.getMediaType().toString());
+            entity = response.readEntity(Object.class);
+        }
+        if (entity != null && Map.class.isAssignableFrom(entity.getClass())) {
+            String maybeReqId = (String) ((Map)entity).get("ReqID");
+            reqId = isNotBlank(maybeReqId) ? maybeReqId : reqId;
+        }
+        return reqId;
+    }
 
     private Client getClient() {
         ClientConfig clientConfig = new ClientConfig();
