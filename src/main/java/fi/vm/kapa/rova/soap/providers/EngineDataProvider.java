@@ -209,7 +209,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         Object entity = null;
         String reqId = "NO_SESSION";
         if (response.hasEntity()) {
-            LOG.error("Response mediatype: "+response.getMediaType().toString());
+            LOG.error("Response mediatype: "+ response.getMediaType() != null ? response.getMediaType().toString() : "mediatype unavailable!");
             entity = response.readEntity(Object.class);
         }
         if (entity != null && Map.class.isAssignableFrom(entity.getClass())) {
