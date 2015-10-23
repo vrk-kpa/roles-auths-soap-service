@@ -29,6 +29,7 @@ RUN apt-get update && \
 # Deploy project
 RUN mkdir -p /opt/rova/roles-auths-soap-service/
 ADD target/roles-auths-soap-service.jar /opt/rova/roles-auths-soap-service/
+ADD service.properties.template /opt/rova/roles-auths-soap-service/
 WORKDIR /opt/rova/roles-auths-soap-service/
 
 EXPOSE 8080
