@@ -1,7 +1,33 @@
 package fi.vm.kapa.rova.soap.providers;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.ws.Holder;
+
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
 import fi.vm.kapa.rova.config.SpringProperties;
-import fi.vm.kapa.rova.engine.model.*;
+import fi.vm.kapa.rova.engine.model.hpa.Authorization;
+import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
+import fi.vm.kapa.rova.engine.model.hpa.Delegate;
+import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
+import fi.vm.kapa.rova.engine.model.ypa.ResultRoleType;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
 import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
@@ -14,26 +40,6 @@ import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.ws.Holder;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
@@ -75,7 +81,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             Principal principal = delegateFactory.createPrincipal();
 
             List<PrincipalType> principals = principal.getPrincipal();
-            for (fi.vm.kapa.rova.engine.model.Principal modelP : delegate.getPrincipal()) {
+            for (fi.vm.kapa.rova.engine.model.hpa.Principal modelP : delegate.getPrincipal()) {
                 PrincipalType current = delegateFactory.createPrincipalType();
                 current.setIdentifier(modelP.getPersonId());
                 current.setName(modelP.getName());
@@ -107,6 +113,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
     }
 
+    @Override
     public void handleAuthorization(String delegateId, String principalId, String service,
             String endUserId, String requestId, Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
 

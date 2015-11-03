@@ -1,5 +1,12 @@
 package fi.vm.kapa.rova.soap;
 
+import static fi.vm.kapa.rova.logging.Logger.Field.DURATION;
+import static fi.vm.kapa.rova.logging.Logger.Field.END_USER;
+import static fi.vm.kapa.rova.logging.Logger.Field.RESULT;
+import static fi.vm.kapa.rova.logging.Logger.Field.SERVICE_ID;
+import static fi.vm.kapa.rova.logging.Logger.Field.SERVICE_REQUEST_IDENTIFIER;
+import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
+
 import javax.jws.WebService;
 import javax.xml.ws.Holder;
 
@@ -10,9 +17,6 @@ import fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory;
 import fi.vm.kapa.xml.rova.api.orgroles.Request;
 import fi.vm.kapa.xml.rova.api.orgroles.Response;
 import fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType;
-
-import static fi.vm.kapa.rova.logging.Logger.Field.*;
-import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType")
 @Component("rovaOrganizationalRolesService")
@@ -54,7 +58,6 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
 
     private void logRolesRequest(Holder<Request> request,
             Holder<Response> response, long startTime, long endTime) {
-        StringBuilder sb = new StringBuilder();
 
         Logger.LogMap logMap = LOG.infoMap();
 
