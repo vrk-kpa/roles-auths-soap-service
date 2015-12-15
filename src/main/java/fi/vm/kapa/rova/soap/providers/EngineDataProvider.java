@@ -75,7 +75,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         Response response = invocationBuilder.get();
 
         if (response.getStatus() == HttpStatus.OK.value()) {
-            HpaDelegate delegate = response.readEntity(HpaDelegate.class);
+            HpaDelegate delegate = response.readEntity(Delegate.class);
             if (delegateResponse.value == null) {
                 delegateResponse.value = delegateFactory.createResponse();
             }
