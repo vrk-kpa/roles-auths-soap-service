@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.Holder;
 
+import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,7 +75,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         Response response = invocationBuilder.get();
 
         if (response.getStatus() == HttpStatus.OK.value()) {
-            Delegate delegate = response.readEntity(Delegate.class);
+            HpaDelegate delegate = response.readEntity(HpaDelegate.class);
             if (delegateResponse.value == null) {
                 delegateResponse.value = delegateFactory.createResponse();
             }
