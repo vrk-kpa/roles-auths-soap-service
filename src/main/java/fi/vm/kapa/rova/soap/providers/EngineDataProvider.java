@@ -153,15 +153,13 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             String endUserId, String requestId,
             Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
         
-
         WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + service + "/" + endUserId + "/" + personId);
         webTarget.queryParam("requestId", requestId);
         if (organizationIds != null) {
             for (Iterator<String> iterator = organizationIds.iterator(); iterator.hasNext();) {
-               webTarget.queryParam("organizationId", iterator.next());
+               webTarget = webTarget.queryParam("organizationId", iterator.next());
             }
         }
-
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
