@@ -16,7 +16,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.Holder;
 
-import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +26,7 @@ import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.model.hpa.Authorization;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
 import fi.vm.kapa.rova.engine.model.hpa.Delegate;
+import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
 import fi.vm.kapa.rova.engine.model.ypa.ResultRoleType;
 import fi.vm.kapa.rova.logging.Logger;
@@ -111,7 +111,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                     .createResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
         }
-
     }
 
     @Override
@@ -203,6 +202,18 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         
     }
 
+    void setEngineUrl(String engineUrl) {
+        this.engineUrl = engineUrl;
+    }
+
+    void setEngineApiKey(String engineApiKey) {
+        this.engineApiKey = engineApiKey;
+    }
+
+    void setRequestAliveSeconds(Integer requestAlive) {
+        this.requestAliveSeconds = requestAlive;
+    }
+
     private String createExceptionMessage(Response response) {
 
         return new StringBuilder("RequestId: ").append(getRequestId(response))
@@ -230,7 +241,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         return reqId;
     }
 
-    private Client getClient() {
+    protected Client getClient() {
         ClientConfig clientConfig = new ClientConfig();
         Client client = ClientBuilder.newClient(clientConfig);
         client.register(JacksonFeature.class);
