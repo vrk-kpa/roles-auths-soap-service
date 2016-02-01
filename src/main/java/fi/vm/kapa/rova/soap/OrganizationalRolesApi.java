@@ -33,7 +33,7 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
         long startTime = System.currentTimeMillis();
 
         dataProvider.handleOrganizationalRoles(request.value.getDelegateIdentifier(),
-                request.value.getOrganizationIdentifierList(),
+                request.value.getOrganizationIdentifier(),
                 getService(), getEndUserId(), 
                 getRequestId(), response);
 
