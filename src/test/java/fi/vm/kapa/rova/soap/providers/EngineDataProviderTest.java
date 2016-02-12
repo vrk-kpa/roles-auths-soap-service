@@ -40,7 +40,6 @@ public class EngineDataProviderTest {
     private static final String ENGINE_URL = "http://höpöhpö:8001/rest/";
 
     @Test
-    @Ignore("Väliaikainen disablointi")
     public void testHandleDelegateRestRequest() {
 
         List<Object> mocks = getMocks(ENGINE_URL + "hpa/delegate/"
