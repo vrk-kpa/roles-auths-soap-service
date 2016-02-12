@@ -64,7 +64,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             Holder<fi.vm.kapa.xml.rova.api.delegate.Response> delegateResponse) {
 
         WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/" + service + "/"
-                + endUserId + "/" + personId).queryParam("requestId", requestId);
+                + personId).queryParam("requestId", requestId);
         
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
        
@@ -116,7 +116,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             String endUserId, String requestId, Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
 
         WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/" + service
-                + "/" + endUserId + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
+                + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
         
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);

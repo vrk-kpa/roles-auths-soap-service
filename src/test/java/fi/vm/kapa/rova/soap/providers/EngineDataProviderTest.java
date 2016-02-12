@@ -55,7 +55,7 @@ public class EngineDataProviderTest {
 
     @Test
     public void testHandleAuthorizationRequest() {
-        List<Object> mocks = getMocks(ENGINE_URL + "hpa/authorization/" + SERVICE_IDENTIFIER + "/" + END_USER + "/"
+        List<Object> mocks = getMocks(ENGINE_URL + "hpa/authorization/" + SERVICE_IDENTIFIER + "/" // + END_USER + "/"
                 + DELEGATE_ID + "/" + PRINCIPAL_ID);
         EngineDataProvider engineDataProvider = getEnginedataProvider((Client) mocks.get(0));
         Holder<fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse> responseHolder = new Holder<fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse>(
