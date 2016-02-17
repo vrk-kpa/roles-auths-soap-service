@@ -28,6 +28,11 @@
             <groupId>fi.vm.kapa.rova</groupId>
             <artifactId>roles-auths-engine-api</artifactId>
         </dependency>
+        <!-- vare model -->
+        <dependency>
+            <groupId>fi.vm.kapa.rova</groupId>
+            <artifactId>roles-auths-vare-api</artifactId>
+        </dependency>
         <!-- ws api -->
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
@@ -230,6 +235,21 @@
                             <wsdlLocation>../../../../../../../wsdl/orgroles.wsdl</wsdlLocation>
                             <wsdlUrls>
                                 <wsdlUrl>${basedir}/src/main/resources/wsdl/orgroles.wsdl</wsdlUrl>
+                            </wsdlUrls>
+                            <verbose>true</verbose>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>mandate</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <packageName>fi.vm.kapa.xml.vare.api.mandate</packageName>
+                            <wsdlLocation>../../../../../../../wsdl/mandate.wsdl</wsdlLocation>
+                            <wsdlUrls>
+                                <wsdlUrl>${basedir}/src/main/resources/wsdl/mandate.wsdl</wsdlUrl>
                             </wsdlUrls>
                             <verbose>true</verbose>
                         </configuration>

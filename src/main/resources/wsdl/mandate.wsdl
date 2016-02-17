@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:xrd="http://x-road.ee/xsd/x-road.xsd" xmlns:xroad="http://x-road.eu/xsd/xroad.xsd"
+                  xmlns:ns="http://x-road.eu/xsd/identifiers" xmlns:items="http://xml.vrk.fi/ws/Vare/Mandate/Entities"
+                  xmlns:request="http://xml.vrk.fi/ws/Vare/Mandate/Request"
+                  xmlns:response="http://xml.vrk.fi/ws/Vare/Mandate/Response"
+                  xmlns:tns="http://xml.vrk.fi/ws/Vare/Mandate" name="VareMandate"
+                  targetNamespace="http://xml.vrk.fi/ws/Vare/Mandate">
+    <wsdl:types>
+        <xsd:schema>
+            <xsd:import namespace="http://x-road.eu/xsd/xroad.xsd"
+                        schemaLocation="xroad6.xsd" />
+        </xsd:schema>
+        <xsd:schema xmlns:tns="http://xml.vrk.fi/ws/Vare/Mandate/Entities"
+                    xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://xml.vrk.fi/ws/Vare/Mandate/Entities">
+            <xsd:complexType name="Request">
+                <xsd:sequence>
+                    <xsd:element name="delegateIdentifier">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Mandatory. Unique identifier of delegate entity.
+                                For example ssn, business ID or similar.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string" />
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="principalIdentifier">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Mandatory. Unique identifier of principal entity.
+                                For example ssn, business ID or similar.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string" />
+                        </xsd:simpleType>
+                    </xsd:element>
+                    <xsd:element name="issues" type="items:Issue" >
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Mandatory. A list of ontology terms which uniquely
+                                determine the mandate subject.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="subject">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Optional. A string specifying the mandate destination.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string" />
+                        </xsd:simpleType>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:complexType>
+			
+            <xsd:complexType name="Issue">
+                <xsd:sequence>
+                    <xsd:element name="issue" maxOccurs="unbounded"
+                                 minOccurs="1" nillable="true" type="tns:IssueUri" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="IssueUri">
+                <xsd:sequence>
+                    <xsd:element name="uri" type="xsd:string" />
+                </xsd:sequence>
+            </xsd:complexType>
+			
+            <xsd:simpleType name="MandateType">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="ALLOWED" />
+                    <xsd:enumeration value="DISALLOWED" />
+                </xsd:restriction>
+            </xsd:simpleType>
+			
+            <xsd:complexType name="VareMandateResponse">
+                <xsd:sequence>
+                    <xsd:element name="mandate" type="items:MandateType" />
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:element name="vareMandateService">
+                <xsd:complexType id="Request">
+                    <xsd:sequence>
+                        <xsd:element name="request" type="items:Request" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="vareMandateServiceResponse">
+                <xsd:complexType id="Response">
+                    <xsd:sequence>
+                        <xsd:element name="request" type="items:Request" />
+                        <xsd:element name="response" type="items:VareMandateResponse" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="requestheader">
+        <wsdl:part name="client" element="xroad:client" />
+        <wsdl:part name="service" element="xroad:service" />
+        <wsdl:part name="userId" element="xroad:userId" />
+        <wsdl:part name="id" element="xroad:id" />
+        <wsdl:part name="async" element="xroad:async" />
+    </wsdl:message>
+    <wsdl:message name="vareMandateService">
+        <wsdl:part name="Request" element="items:vareMandateService" />
+    </wsdl:message>
+    <wsdl:message name="vareMandateServiceResponse">
+        <wsdl:part name="Response" element="items:vareMandateServiceResponse" />
+    </wsdl:message>
+    <wsdl:portType name="vareMandatePortType">
+        <wsdl:operation name="vareMandateService">
+            <wsdl:input name="vareMandateService" message="tns:vareMandateService" />
+            <wsdl:output name="vareMandateServiceResponse"
+                         message="tns:vareMandateServiceResponse" />
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="vareMandateBinding" type="tns:vareMandatePortType">
+        <soap:binding style="document"
+                      transport="http://schemas.xmlsoap.org/soap/http" />
+        <wsdl:operation name="vareMandateService">
+            <soap:operation soapAction="" />
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal" />
+                <soap:header message="tns:requestheader" part="client"
+                             use="literal" />
+                <soap:header message="tns:requestheader" part="service"
+                             use="literal" />
+                <soap:header message="tns:requestheader" part="userId"
+                             use="literal" />
+                <soap:header message="tns:requestheader" part="id" use="literal" />
+                <soap:header message="tns:requestheader" part="async"
+                             use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+                <soap:header message="tns:requestheader" part="client"
+                             use="literal" />
+                <soap:header message="tns:requestheader" part="service"
+                             use="literal" />
+                <soap:header message="tns:requestheader" part="userId"
+                             use="literal" />
+                <soap:header message="tns:requestheader" part="id" use="literal" />
+                <soap:header message="tns:requestheader" part="async"
+                             use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="Vare_Mandate_Service">
+        <wsdl:documentation>WSDL-file for VaRe Mandate service
+        </wsdl:documentation>
+        <wsdl:port name="vareMandatePort" binding="tns:vareMandateBinding">
+            <soap:address location="http://localhost:8000/vare/mandate" />
+        </wsdl:port>
+    </wsdl:service>
+    <!-- Schema for identifiers (reduced) -->
+</wsdl:definitions>

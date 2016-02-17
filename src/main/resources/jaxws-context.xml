@@ -36,4 +36,13 @@
             </ws:service>
         </wss:service>
     </wss:binding>
+    <wss:binding url="/vare/mandate">
+        <wss:service>
+            <ws:service bean="#vareMandateService">
+                <ws:handlers>
+                    <ref bean="xroadHeaderHandler" />
+                </ws:handlers>
+            </ws:service>
+        </wss:service>
+    </wss:binding>
 </beans>

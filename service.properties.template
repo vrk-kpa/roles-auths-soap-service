@@ -1,5 +1,8 @@
 engine_url=http://{{ rova_engine }}:8001{{ engine_api_path_prefix }}/
 engine_api_key={{ engine_api_key }}
+vare_url=http://{{ rova_vare }}:8005{{ vare_api_path_prefix }}/
+vare_api_key={{ vare_api_key }}
+
 request_alive_seconds=5
 
 logstash.host={{ logstash_host }}
