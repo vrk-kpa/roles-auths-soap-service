@@ -38,6 +38,10 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
         </dependency>
+        <dependency>
+            <groupId>fi.vm.kapa.rova</groupId>
+            <artifactId>roles-auths-wsdl</artifactId>
+        </dependency>
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -188,73 +192,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jvnet.jax-ws-commons</groupId>
-                <artifactId>jaxws-maven-plugin</artifactId>
-                <version>2.1</version>
-                <executions>
-                    <execution>
-                        <id>delegate</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <packageName>fi.vm.kapa.xml.rova.api.delegate</packageName>
-                            <wsdlLocation>../../../../../../../wsdl/delegate.wsdl</wsdlLocation>
-                            <wsdlUrls>
-                                <wsdlUrl>${basedir}/src/main/resources/wsdl/delegate.wsdl</wsdlUrl>
-                            </wsdlUrls>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>authorization</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <packageName>fi.vm.kapa.xml.rova.api.authorization</packageName>
-                            <wsdlLocation>../../../../../../../wsdl/authorization.wsdl</wsdlLocation>
-                            <wsdlUrls>
-                                <wsdlUrl>${basedir}/src/main/resources/wsdl/authorization.wsdl</wsdlUrl>
-                            </wsdlUrls>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>orgroles</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <packageName>fi.vm.kapa.xml.rova.api.orgroles</packageName>
-                            <wsdlLocation>../../../../../../../wsdl/orgroles.wsdl</wsdlLocation>
-                            <wsdlUrls>
-                                <wsdlUrl>${basedir}/src/main/resources/wsdl/orgroles.wsdl</wsdlUrl>
-                            </wsdlUrls>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>mandate</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <packageName>fi.vm.kapa.xml.vare.api.mandate</packageName>
-                            <wsdlLocation>../../../../../../../wsdl/mandate.wsdl</wsdlLocation>
-                            <wsdlUrls>
-                                <wsdlUrl>${basedir}/src/main/resources/wsdl/mandate.wsdl</wsdlUrl>
-                            </wsdlUrls>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
