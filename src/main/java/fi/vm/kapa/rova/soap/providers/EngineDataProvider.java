@@ -7,6 +7,7 @@ import fi.vm.kapa.rova.engine.model.hpa.Delegate;
 import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
 import fi.vm.kapa.rova.engine.model.ypa.ResultRoleType;
+import fi.vm.kapa.rova.engine.model.ypa.RovaListResult;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
 import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
@@ -33,10 +34,10 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.Holder;
+import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -163,23 +164,28 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         Response response = invocationBuilder.get();
 
         if (response.getStatus() == HttpStatus.OK.value()) {
-            Set<OrganizationResult> roles = response.readEntity(new GenericType<Set<OrganizationResult>>() {});
+            RovaListResult<OrganizationResult> roles = response.readEntity(new GenericType<RovaListResult<OrganizationResult>>() {});
 
             OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
             List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
 
             if (roles != null) {
-                for (OrganizationResult organizationResult : roles) {
+                for (OrganizationResult organizationResult : roles.getContents()) {
                     OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType(); 
                     fi.vm.kapa.xml.rova.api.orgroles.OrganizationType organizationType = organizationalRolesFactory.createOrganizationType();
                     organizationType.setName(organizationResult.getName());
                     organizationType.setOrganizationIdentifier(organizationResult.getIdentifier());
                     ort.setOrganization(organizationType);
+                    ort.setSize(new BigInteger(String.valueOf(roles.size())));
+                    ort.setLimit(new BigInteger(String.valueOf("30")));
+                    ort.setOffset(new BigInteger(String.valueOf("0")));
+                    ort.setTotal(new BigInteger(String.valueOf(roles.size())));
                     RoleList roleList = organizationalRolesFactory.createRoleList();
                     for (ResultRoleType rt : organizationResult.getRoles()) {
                         roleList.getRole().add(rt.toString());
                     }
                     ort.setRoles(roleList);
+
                     organizationalRoles.add(ort);
                 }
             } else {
