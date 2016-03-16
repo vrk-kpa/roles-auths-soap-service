@@ -24,7 +24,6 @@ import javax.xml.ws.Holder;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 
@@ -42,7 +41,7 @@ public class EngineDataProviderTest {
     @Test
     public void testHandleDelegateRestRequest() {
 
-        List<Object> mocks = getMocks(ENGINE_URL + "hpa/delegate/"
+        List<Object> mocks = getMocks(ENGINE_URL + "hpa/delegate/xroad/"
                 + SERVICE_IDENTIFIER + "/" + DELEGATE_ID);
 
         EngineDataProvider engineDataProvider = getEnginedataProvider((Client) mocks.get(0));
@@ -56,7 +55,7 @@ public class EngineDataProviderTest {
 
     @Test
     public void testHandleAuthorizationRequest() {
-        List<Object> mocks = getMocks(ENGINE_URL + "hpa/authorization/"
+        List<Object> mocks = getMocks(ENGINE_URL + "hpa/authorization/xroad/"
                 + SERVICE_IDENTIFIER + "/" + DELEGATE_ID + "/" + PRINCIPAL_ID);
         
         EngineDataProvider engineDataProvider = getEnginedataProvider((Client) mocks.get(0));
