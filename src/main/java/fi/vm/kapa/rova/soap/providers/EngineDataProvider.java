@@ -1,5 +1,27 @@
 package fi.vm.kapa.rova.soap.providers;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.math.BigInteger;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.ws.Holder;
+
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
 import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.model.hpa.Authorization;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
@@ -20,26 +42,6 @@ import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.ws.Holder;
-import java.math.BigInteger;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
@@ -64,7 +66,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     public void handleDelegate(String personId, String service, String endUserId, String requestId,
             Holder<fi.vm.kapa.xml.rova.api.delegate.Response> delegateResponse) {
 
-        WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/" + service + "/"
+        WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/xroad/" + service + "/"
                 + personId).queryParam("requestId", requestId);
         
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
@@ -116,7 +118,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     public void handleAuthorization(String delegateId, String principalId, String service,
             String endUserId, String requestId, Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
 
-        WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/" + service
+        WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/xroad/" + service
                 + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
         
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
@@ -151,7 +153,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             String endUserId, String requestId,
             Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
         
-        WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + service + "/" + personId);
+        WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/xroad/" + service + "/" + personId);
         webTarget.queryParam("requestId", requestId);
         if (organizationIds != null) {
             for (Iterator<String> iterator = organizationIds.iterator(); iterator.hasNext();) {
