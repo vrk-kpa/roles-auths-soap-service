@@ -1,11 +1,11 @@
 package fi.vm.kapa.rova.soap.providers;
 
-import java.util.List;
-
-import javax.xml.ws.Holder;
-
 import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
 import fi.vm.kapa.xml.rova.api.delegate.Response;
+
+import javax.xml.ws.Holder;
+import java.math.BigInteger;
+import java.util.List;
 
 
 public interface DataProvider {
@@ -23,7 +23,7 @@ public interface DataProvider {
             Holder<Response> response);
     
     void handleOrganizationalRoles(String personId, List<String> organizationIds, String service,
-            String endUserId, String requestId,
-            Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> response);
+                                   String endUserId, BigInteger offset, BigInteger limit, String requestId,
+                                   Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> response);
     
 }

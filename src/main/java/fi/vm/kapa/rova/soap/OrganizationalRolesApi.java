@@ -1,22 +1,17 @@
 package fi.vm.kapa.rova.soap;
 
-import static fi.vm.kapa.rova.logging.Logger.Field.DURATION;
-import static fi.vm.kapa.rova.logging.Logger.Field.END_USER;
-import static fi.vm.kapa.rova.logging.Logger.Field.RESULT;
-import static fi.vm.kapa.rova.logging.Logger.Field.SERVICE_ID;
-import static fi.vm.kapa.rova.logging.Logger.Field.SERVICE_REQUEST_IDENTIFIER;
-import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
-
-import javax.jws.WebService;
-import javax.xml.ws.Holder;
-
-import org.springframework.stereotype.Component;
-
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory;
 import fi.vm.kapa.xml.rova.api.orgroles.Request;
 import fi.vm.kapa.xml.rova.api.orgroles.Response;
 import fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType;
+import org.springframework.stereotype.Component;
+
+import javax.jws.WebService;
+import javax.xml.ws.Holder;
+
+import static fi.vm.kapa.rova.logging.Logger.Field.*;
+import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType")
 @Component("rovaOrganizationalRolesService")
@@ -34,7 +29,8 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
 
         dataProvider.handleOrganizationalRoles(request.value.getDelegateIdentifier(),
                 request.value.getOrganizationIdentifier(),
-                getService(), getEndUserId(), 
+                getService(), getEndUserId(),
+                request.value.getOffset(), request.value.getLimit(),
                 getRequestId(), response);
 
         logRolesRequest(request, response, startTime, System.currentTimeMillis());

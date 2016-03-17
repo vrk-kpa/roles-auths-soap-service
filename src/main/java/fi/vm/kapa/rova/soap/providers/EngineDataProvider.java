@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.Holder;
 
+import fi.vm.kapa.rova.external.model.ServiceIdType;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.springframework.beans.factory.annotation.Value;
@@ -150,10 +151,11 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
     @Override
     public void handleOrganizationalRoles(String personId, List<String> organizationIds, String service,
-            String endUserId, String requestId,
-            Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
+                                          String endUserId, BigInteger offset, BigInteger limit, String requestId,
+                                          Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
         
-        WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/xroad/" + service + "/" + personId);
+        WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + ServiceIdType.XROAD.getText() + "/" + service + "/" + personId +
+                "/" + String.valueOf(offset.intValueExact()) + "/" + String.valueOf(limit.intValueExact()));
         webTarget.queryParam("requestId", requestId);
         if (organizationIds != null) {
             for (Iterator<String> iterator = organizationIds.iterator(); iterator.hasNext();) {
@@ -179,8 +181,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                     organizationType.setOrganizationIdentifier(organizationResult.getIdentifier());
                     ort.setOrganization(organizationType);
                     ort.setSize(new BigInteger(String.valueOf(roles.size())));
-                    ort.setLimit(new BigInteger(String.valueOf("30")));
-                    ort.setOffset(new BigInteger(String.valueOf("0")));
+                    ort.setLimit(limit);
+                    ort.setOffset(offset);
                     ort.setTotal(new BigInteger(String.valueOf(roles.size())));
                     RoleList roleList = organizationalRolesFactory.createRoleList();
                     for (ResultRoleType rt : organizationResult.getRoles()) {
