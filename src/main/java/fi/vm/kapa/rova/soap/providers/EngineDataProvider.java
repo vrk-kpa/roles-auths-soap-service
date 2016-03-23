@@ -173,11 +173,9 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
             List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
 
+            int roleCount = 0;
             if (roles != null) {
-                organizationListType.setSize(new BigInteger(String.valueOf(roles.size())));
-                organizationListType.setLimit(limit);
-                organizationListType.setOffset(offset);
-                organizationListType.setTotal(new BigInteger(String.valueOf(roles.getTotal())));
+                roleCount = roles.size();
                 for (OrganizationResult organizationResult : roles.getContents()) {
                     OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType(); 
                     fi.vm.kapa.xml.rova.api.orgroles.OrganizationType organizationType = organizationalRolesFactory.createOrganizationType();
@@ -201,6 +199,10 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             
             rolesResponseHolder.value = organizationalRolesFactory.createResponse();
             rolesResponseHolder.value.setOrganizationList(organizationListType);
+            rolesResponseHolder.value.setSize(new BigInteger(String.valueOf(roleCount)));
+            rolesResponseHolder.value.setLimit(new BigInteger(String.valueOf(limitStr)));
+            rolesResponseHolder.value.setOffset(new BigInteger(String.valueOf(offsetStr)));
+            rolesResponseHolder.value.setTotal(new BigInteger(String.valueOf(roles.getTotal())));
         } else {
             rolesResponseHolder.value = organizationalRolesFactory.createResponse();
             rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory
