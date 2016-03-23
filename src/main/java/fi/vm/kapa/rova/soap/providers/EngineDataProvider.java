@@ -1,28 +1,5 @@
 package fi.vm.kapa.rova.soap.providers;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.math.BigInteger;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.ws.Holder;
-
-import fi.vm.kapa.rova.external.model.ServiceIdType;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
 import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.model.hpa.Authorization;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
@@ -31,6 +8,7 @@ import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
 import fi.vm.kapa.rova.engine.model.ypa.ResultRoleType;
 import fi.vm.kapa.rova.engine.model.ypa.RovaListResult;
+import fi.vm.kapa.rova.external.model.ServiceIdType;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
 import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
@@ -43,6 +21,26 @@ import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.ws.Holder;
+import java.math.BigInteger;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
@@ -153,9 +151,11 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     public void handleOrganizationalRoles(String personId, List<String> organizationIds, String service,
                                           String endUserId, BigInteger offset, BigInteger limit, String requestId,
                                           Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
-        
+        String offsetStr = offset != null ? String.valueOf(offset.intValueExact()) : "0";
+        String limitStr = limit != null ? String.valueOf(limit.intValueExact()) : "30";
+
         WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + ServiceIdType.XROAD.getText() + "/" + service + "/" + personId +
-                "/" + String.valueOf(offset.intValueExact()) + "/" + String.valueOf(limit.intValueExact()));
+                "/" + offsetStr + "/" + limitStr);
         webTarget.queryParam("requestId", requestId);
         if (organizationIds != null) {
             for (Iterator<String> iterator = organizationIds.iterator(); iterator.hasNext();) {
@@ -174,16 +174,16 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
 
             if (roles != null) {
+                organizationListType.setSize(new BigInteger(String.valueOf(roles.size())));
+                organizationListType.setLimit(limit);
+                organizationListType.setOffset(offset);
+                organizationListType.setTotal(new BigInteger(String.valueOf(roles.getTotal())));
                 for (OrganizationResult organizationResult : roles.getContents()) {
                     OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType(); 
                     fi.vm.kapa.xml.rova.api.orgroles.OrganizationType organizationType = organizationalRolesFactory.createOrganizationType();
                     organizationType.setName(organizationResult.getName());
                     organizationType.setOrganizationIdentifier(organizationResult.getIdentifier());
                     ort.setOrganization(organizationType);
-                    ort.setSize(new BigInteger(String.valueOf(roles.size())));
-                    ort.setLimit(limit);
-                    ort.setOffset(offset);
-                    ort.setTotal(new BigInteger(String.valueOf(roles.size())));
                     RoleList roleList = organizationalRolesFactory.createRoleList();
                     for (ResultRoleType rt : organizationResult.getRoles()) {
                         roleList.getRole().add(rt.toString());
