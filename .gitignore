@@ -6,3 +6,4 @@
 
 dc-application.properties
 logback.xml
+/application.properties
