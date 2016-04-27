@@ -114,11 +114,15 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     }
 
     @Override
-    public void handleAuthorization(String delegateId, String principalId, String service,
+    public void handleAuthorization(String delegateId, String principalId, List<String> issues, String service,
             String endUserId, String requestId, Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
 
         WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/xroad/" + service
                 + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
+
+        if (issues != null && !issues.isEmpty()) {
+            webTarget = webTarget.queryParam("issue", issues);
+        }
         
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);

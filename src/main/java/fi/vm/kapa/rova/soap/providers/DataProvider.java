@@ -13,6 +13,7 @@ public interface DataProvider {
     void handleAuthorization(
             String delegateId,
             String principalId,
+            List<String> issues,
             String service,
             String endUserId,
             String requestId,
