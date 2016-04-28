@@ -1,33 +1,21 @@
 package fi.vm.kapa.rova.soap.providers;
 
-import java.lang.annotation.Annotation;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.Link;
-import javax.ws.rs.core.Link.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response.Status.Family;
-import javax.xml.ws.Holder;
-
+import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 
-import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Link.Builder;
+import javax.ws.rs.core.Response.Status.Family;
+import javax.xml.ws.Holder;
+import java.lang.annotation.Annotation;
+import java.net.URI;
+import java.util.*;
 
 public class EngineDataProviderTest {
 
@@ -62,7 +50,7 @@ public class EngineDataProviderTest {
         Holder<fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse> responseHolder = 
                 new Holder<fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse>(null);
         EasyMock.replay(mocks.toArray());
-        engineDataProvider.handleAuthorization(DELEGATE_ID, PRINCIPAL_ID,
+        engineDataProvider.handleAuthorization(DELEGATE_ID, PRINCIPAL_ID, Collections.emptyList(),
                 SERVICE_IDENTIFIER, END_USER, REQUEST_ID, responseHolder);
         EasyMock.verify(mocks.toArray());
         Assert.assertNotNull(responseHolder.value);

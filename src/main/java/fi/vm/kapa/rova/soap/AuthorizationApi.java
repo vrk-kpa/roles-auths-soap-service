@@ -35,7 +35,7 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
         long startTime = System.currentTimeMillis();
 
         dataProvider.handleAuthorization(request.value.getDelegateIdentifier(),
-                request.value.getPrincipalIdentifier(), getService(),
+                request.value.getPrincipalIdentifier(), request.value.getIssues(), getService(),
                 getEndUserId(), getRequestId(), response);
 
         logAuthorizationRequest(request, response, startTime, System.currentTimeMillis());
