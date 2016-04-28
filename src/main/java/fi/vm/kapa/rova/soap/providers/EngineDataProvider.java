@@ -1,5 +1,27 @@
 package fi.vm.kapa.rova.soap.providers;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.math.BigInteger;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.ws.Holder;
+
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
 import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.model.hpa.Authorization;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
@@ -21,26 +43,6 @@ import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.ws.Holder;
-import java.math.BigInteger;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
@@ -120,8 +122,10 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/xroad/" + service
                 + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
 
-        if (issues != null && !issues.isEmpty()) {
-            webTarget = webTarget.queryParam("issue", issues);
+        if (issues != null) {
+            for(String issue : issues) {
+                webTarget = webTarget.queryParam("issue", issue);
+            }
         }
         
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
