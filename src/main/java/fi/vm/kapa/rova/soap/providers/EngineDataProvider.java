@@ -185,11 +185,9 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             if (roles != null) {
                 roleCount = roles.size();
                 for (OrganizationResult organizationResult : roles.getContents()) {
-                    OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType(); 
-                    fi.vm.kapa.xml.rova.api.orgroles.OrganizationType organizationType = organizationalRolesFactory.createOrganizationType();
-                    organizationType.setName(organizationResult.getName());
-                    organizationType.setOrganizationIdentifier(organizationResult.getIdentifier());
-                    ort.setOrganization(organizationType);
+                    OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType();
+                    ort.setName(organizationResult.getName());
+                    ort.setOrganizationIdentifier(organizationResult.getIdentifier());
                     RoleList roleList = organizationalRolesFactory.createRoleList();
                     for (ResultRoleType rt : organizationResult.getRoles()) {
                         roleList.getRole().add(rt.toString());
