@@ -267,7 +267,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             LOG.error("Response mediatype: "+ (response.getMediaType() != null ? response.getMediaType().toString() : "mediatype unavailable!"));
             try {
                 entity = response.readEntity(Object.class);
-            } catch (Throwable t) {
+            } catch (Exception t) {
                 LOG.error("Response mediatype: "+ t);
                 // eat
             }

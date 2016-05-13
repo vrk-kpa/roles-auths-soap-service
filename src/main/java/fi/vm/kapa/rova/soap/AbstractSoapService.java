@@ -37,10 +37,13 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.developer.JAXWSProperties;
 
+import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.soap.model.ClientHeader;
 import fi.vm.kapa.rova.soap.providers.DataProvider;
 
 abstract class AbstractSoapService extends SpringBeanAutowiringSupport {
+
+    private static Logger LOG = Logger.getLogger(AbstractSoapService.class);
 
     @Autowired
     DataProvider dataProvider;
@@ -72,7 +75,7 @@ abstract class AbstractSoapService extends SpringBeanAutowiringSupport {
             ClientHeader ch = jb.getValue();
             result = ch.getServiceName(concatStr);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
         return result;
     }
