@@ -40,8 +40,12 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import org.springframework.stereotype.Component;
 
+import fi.vm.kapa.rova.logging.Logger;
+
 @Component("xroadHeaderHandler")
 public class SoapHeaderCopyHandler implements SOAPHandler<SOAPMessageContext> {
+
+    private static Logger LOG = Logger.getLogger(SoapHeaderCopyHandler.class);
 
     public Set<QName> getHeaders() {
         return Collections.emptySet();
@@ -66,7 +70,7 @@ public class SoapHeaderCopyHandler implements SOAPHandler<SOAPMessageContext> {
                 }
                 messageContext.put("original-soap-headers", headerList);
             } catch (SOAPException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
             }
         } else if (outboundProperty.booleanValue()) {
             try {
@@ -83,7 +87,7 @@ public class SoapHeaderCopyHandler implements SOAPHandler<SOAPMessageContext> {
                 }
                 soapMsg.saveChanges();
             } catch (SOAPException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
             }
         }
         return true;
