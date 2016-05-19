@@ -24,7 +24,6 @@ package fi.vm.kapa.rova.soap.providers;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +50,6 @@ import fi.vm.kapa.rova.engine.model.hpa.Delegate;
 import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
 import fi.vm.kapa.rova.engine.model.ypa.ResultRoleType;
-import fi.vm.kapa.rova.engine.model.ypa.RovaListResult;
 import fi.vm.kapa.rova.external.model.ServiceIdType;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
@@ -179,13 +177,10 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
     @Override
     public void handleOrganizationalRoles(String personId, List<String> organizationIds, String service,
-                                          String endUserId, BigInteger offset, BigInteger limit, String requestId,
+                                          String endUserId, String requestId,
                                           Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
-        String offsetStr = offset != null ? String.valueOf(offset.intValueExact()) : "0";
-        String limitStr = limit != null ? String.valueOf(limit.intValueExact()) : "30";
 
-        WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + ServiceIdType.XROAD.getText() + "/" + service + "/" + personId +
-                "/" + offsetStr + "/" + limitStr);
+        WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + ServiceIdType.XROAD.getText() + "/" + service + "/" + personId);
         webTarget.queryParam("requestId", requestId);
         if (organizationIds != null) {
             for (Iterator<String> iterator = organizationIds.iterator(); iterator.hasNext();) {
@@ -198,15 +193,13 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         Response response = invocationBuilder.get();
 
         if (response.getStatus() == HttpStatus.OK.value()) {
-            RovaListResult<OrganizationResult> roles = response.readEntity(new GenericType<RovaListResult<OrganizationResult>>() {});
+            List<OrganizationResult> roles = response.readEntity(new GenericType<List<OrganizationResult>>() {});
 
             OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
             List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
 
-            int roleCount = 0;
             if (roles != null) {
-                roleCount = roles.size();
-                for (OrganizationResult organizationResult : roles.getContents()) {
+                for (OrganizationResult organizationResult : roles) {
                     OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType();
                     ort.setName(organizationResult.getName());
                     ort.setOrganizationIdentifier(organizationResult.getIdentifier());
@@ -227,10 +220,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             
             rolesResponseHolder.value = organizationalRolesFactory.createResponse();
             rolesResponseHolder.value.setOrganizationList(organizationListType);
-            rolesResponseHolder.value.setSize(new BigInteger(String.valueOf(roleCount)));
-            rolesResponseHolder.value.setLimit(new BigInteger(String.valueOf(limitStr)));
-            rolesResponseHolder.value.setOffset(new BigInteger(String.valueOf(offsetStr)));
-            rolesResponseHolder.value.setTotal(new BigInteger(String.valueOf(roles.getTotal())));
         } else {
             rolesResponseHolder.value = organizationalRolesFactory.createResponse();
             rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory
