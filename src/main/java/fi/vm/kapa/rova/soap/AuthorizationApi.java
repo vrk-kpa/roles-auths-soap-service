@@ -22,27 +22,16 @@
  */
 package fi.vm.kapa.rova.soap;
 
-import static fi.vm.kapa.rova.logging.Logger.Field.DURATION;
-import static fi.vm.kapa.rova.logging.Logger.Field.END_USER;
-import static fi.vm.kapa.rova.logging.Logger.Field.REASONS;
-import static fi.vm.kapa.rova.logging.Logger.Field.RESULT;
-import static fi.vm.kapa.rova.logging.Logger.Field.SERVICE_ID;
-import static fi.vm.kapa.rova.logging.Logger.Field.SERVICE_REQUEST_IDENTIFIER;
-import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
-
-import java.util.Iterator;
+import fi.vm.kapa.rova.logging.Logger;
+import fi.vm.kapa.xml.rova.api.authorization.*;
+import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
 import javax.xml.ws.Holder;
+import java.util.Iterator;
 
-import org.springframework.stereotype.Component;
-
-import fi.vm.kapa.rova.logging.Logger;
-import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
-import fi.vm.kapa.xml.rova.api.authorization.ObjectFactory;
-import fi.vm.kapa.xml.rova.api.authorization.Request;
-import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationPortType;
-import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
+import static fi.vm.kapa.rova.logging.Logger.Field.*;
+import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationPortType")
 @Component("rovaAuthorizationService")
@@ -57,7 +46,7 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
         long startTime = System.currentTimeMillis();
 
         dataProvider.handleAuthorization(request.value.getDelegateIdentifier(),
-                request.value.getPrincipalIdentifier(), request.value.getIssues(), getService(),
+                request.value.getPrincipalIdentifier(), request.value.getIssue(), getService(),
                 getEndUserId(), getRequestId(), response);
 
         logAuthorizationRequest(request, response, startTime, System.currentTimeMillis());
