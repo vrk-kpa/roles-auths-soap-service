@@ -14,6 +14,7 @@
             <ws:service bean="#rovaDelegateService">
                 <ws:handlers>
                     <ref bean="xroadHeaderHandler" />
+                    <ref bean="verifyXRoadUserIdSoapHandler" />
                 </ws:handlers>
             </ws:service>
         </wss:service>
@@ -23,6 +24,7 @@
             <ws:service bean="#rovaAuthorizationService">
                 <ws:handlers>
                     <ref bean="xroadHeaderHandler" />
+                    <ref bean="verifyXRoadUserIdSoapHandler" />
                 </ws:handlers>
             </ws:service>
         </wss:service>
@@ -32,6 +34,7 @@
             <ws:service bean="#rovaOrganizationalRolesService">
                 <ws:handlers>
                     <ref bean="xroadHeaderHandler" />
+                    <ref bean="verifyXRoadUserIdSoapHandler" />
                 </ws:handlers>
             </ws:service>
         </wss:service>
@@ -41,6 +44,7 @@
             <ws:service bean="#vareMandateService">
                 <ws:handlers>
                     <ref bean="xroadHeaderHandler" />
+                    <ref bean="verifyXRoadUserIdSoapHandler" />
                 </ws:handlers>
             </ws:service>
         </wss:service>
