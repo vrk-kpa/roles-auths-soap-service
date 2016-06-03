@@ -240,16 +240,23 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     }
 
     private String createExceptionMessage(Response response) {
-
-        return new StringBuilder("RequestId: ").append(getRequestId(response))
-                .append(", Date: ").append(response.getDate())
-                .append(", Status: ").append(response.getStatusInfo().getStatusCode())
-                .append(" ").append(response.getStatusInfo().getReasonPhrase()).toString();
+        Map<String, String> attributes = getAttributes(response);
+        
+        return String.format("RequestId: %s, Date: %s, Status: %d %s, Message: %s",
+                valueOrDefault(attributes.get("ReqId"), "NO_SESSION"),
+                response.getDate().toString(),
+                response.getStatusInfo().getStatusCode(),
+                response.getStatusInfo().getReasonPhrase(),
+                valueOrDefault(attributes.get("errorMessage"), "(none)"));
+    }
+    
+    private String valueOrDefault(String value, String defaultValue) {
+        return isNotBlank(value) ? value : defaultValue;
     }
 
-    protected String getRequestId(Response response) {
+    @SuppressWarnings("unchecked")
+    private Map<String, String> getAttributes(Response response) {
         Object entity = null;
-        String reqId = "NO_SESSION";
         if (response.hasEntity()) {
             LOG.error("Response mediatype: "+ (response.getMediaType() != null ? response.getMediaType().toString() : "mediatype unavailable!"));
             try {
@@ -259,11 +266,10 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                 // eat
             }
         }
-        if (entity != null && Map.class.isAssignableFrom(entity.getClass())) {
-            String maybeReqId = (String) ((Map)entity).get("ReqID");
-            reqId = isNotBlank(maybeReqId) ? maybeReqId : reqId;
-        }
-        return reqId;
+        if (entity != null && Map.class.isAssignableFrom(entity.getClass()))
+            return (Map<String, String>)entity;
+        else
+            return null;
     }
 
     protected Client getClient() {
