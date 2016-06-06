@@ -56,6 +56,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.ws.Holder;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -258,18 +259,19 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     private Map<String, String> getAttributes(Response response) {
         Object entity = null;
         if (response.hasEntity()) {
-            LOG.error("Response mediatype: "+ (response.getMediaType() != null ? response.getMediaType().toString() : "mediatype unavailable!"));
+            LOG.error("Response mediatype: " + (response.getMediaType() != null ? response.getMediaType().toString() : "mediatype unavailable!"));
             try {
                 entity = response.readEntity(Object.class);
             } catch (RuntimeException t) {
-                LOG.error("Response mediatype: "+ t);
+                LOG.error("Response mediatype: " + t);
                 // eat
             }
         }
-        if (entity != null && Map.class.isAssignableFrom(entity.getClass()))
-            return (Map<String, String>)entity;
-        else
-            return null;
+        if (entity != null && Map.class.isAssignableFrom(entity.getClass())) {
+            return (Map<String, String>) entity;
+        }
+
+        return Collections.emptyMap();
     }
 
     protected Client getClient() {
