@@ -244,7 +244,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         Map<String, String> attributes = getAttributes(response);
         
         return String.format("RequestId: %s, Date: %s, Status: %d %s, Message: %s",
-                valueOrDefault(attributes.get("ReqId"), "NO_SESSION"),
+                valueOrDefault(attributes.get("ReqID"), "NO_SESSION"),
                 response.getDate().toString(),
                 response.getStatusInfo().getStatusCode(),
                 response.getStatusInfo().getReasonPhrase(),
