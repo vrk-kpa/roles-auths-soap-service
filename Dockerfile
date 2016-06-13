@@ -1,5 +1,5 @@
 # Pull base image
-FROM ubuntu:14.04
+FROM ubuntu@sha256:eae3725cb06909d017a06a813b9530006187fcce82cf45005b94a34c8cf43f8d
 
 # Install common tools
 RUN \
