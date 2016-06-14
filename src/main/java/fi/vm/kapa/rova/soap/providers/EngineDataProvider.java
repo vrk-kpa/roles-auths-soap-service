@@ -116,9 +116,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
         if (response.getStatus() == HttpStatus.OK.value()) {
             HpaDelegate delegate = response.readEntity(Delegate.class);
-//            if (delegateResponse.value == null) {
-//                delegateResponse.value = delegateFactory.createResponse();
-//            }
             Principal principal = delegateFactory.createPrincipal();
 
             List<PrincipalType> principals = principal.getPrincipal();
@@ -146,7 +143,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                         fi.vm.kapa.xml.rova.api.delegate.AuthorizationType.valueOf(delegate.getAuthorizationType().toString()));
             }
         } else {
-//            delegateResponse.value = delegateFactory.createResponse();
             delegateResponse.value.setExceptionMessage(delegateFactory
                     .createResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
@@ -184,7 +180,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         if (response.getStatus() == HttpStatus.OK.value()) {
             Authorization auth = response.readEntity(Authorization.class);
 
-//            authorizationResponseHolder.value = authorizationFactory.createRovaAuthorizationResponse();
             authorizationResponseHolder.value.setAuthorization(AuthorizationType.fromValue(auth.getResult().toString()));
 
             if (auth.getReasons() != null) {
@@ -196,7 +191,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                 }
             }
         } else {
-//            authorizationResponseHolder.value = authorizationFactory.createRovaAuthorizationResponse();
             authorizationResponseHolder.value.setExceptionMessage(authorizationFactory
                     .createRovaAuthorizationResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
@@ -255,10 +249,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                 organizationalRoles.add(ort);
             }
             
-//            rolesResponseHolder.value = organizationalRolesFactory.createResponse();
             rolesResponseHolder.value.setOrganizationList(organizationListType);
         } else {
-//            rolesResponseHolder.value = organizationalRolesFactory.createResponse();
             rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory
                     .createResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
