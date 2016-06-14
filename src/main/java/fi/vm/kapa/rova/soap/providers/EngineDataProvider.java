@@ -34,6 +34,7 @@ import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
 import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
 import fi.vm.kapa.rova.rest.validation.ValidationClientRequestFilter;
+import fi.vm.kapa.rova.utils.HetuUtils;
 import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
 import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
 import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
@@ -42,6 +43,7 @@ import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
+
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,8 +57,12 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.xml.ws.Holder;
+
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +73,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class EngineDataProvider implements DataProvider, SpringProperties {
 
     Logger LOG = Logger.getLogger(EngineDataProvider.class);
+    public static final String INVALID_HETU_MSG = "Invalid hetu.";
 
     private fi.vm.kapa.xml.rova.api.authorization.ObjectFactory authorizationFactory = new fi.vm.kapa.xml.rova.api.authorization.ObjectFactory();
     private fi.vm.kapa.xml.rova.api.delegate.ObjectFactory delegateFactory = new fi.vm.kapa.xml.rova.api.delegate.ObjectFactory();
@@ -86,6 +93,18 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     public void handleDelegate(String personId, String service, String endUserId, String requestId,
             Holder<fi.vm.kapa.xml.rova.api.delegate.Response> delegateResponse) {
 
+        if (delegateResponse.value == null) {
+            delegateResponse.value = delegateFactory.createResponse();
+        }
+
+        if (!HetuUtils.isHetuValid(personId)) {
+            delegateResponse.value.setExceptionMessage(delegateFactory
+                    .createResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
+                            new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
+            LOG.error("Got invalid handleDelegate request: "+ INVALID_HETU_MSG +" "+ personId);
+            return;
+        }
+
         WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/xroad/" + service + "/"
                 + personId).queryParam("requestId", requestId);
         
@@ -97,9 +116,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
         if (response.getStatus() == HttpStatus.OK.value()) {
             HpaDelegate delegate = response.readEntity(Delegate.class);
-            if (delegateResponse.value == null) {
-                delegateResponse.value = delegateFactory.createResponse();
-            }
             Principal principal = delegateFactory.createPrincipal();
 
             List<PrincipalType> principals = principal.getPrincipal();
@@ -127,7 +143,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                         fi.vm.kapa.xml.rova.api.delegate.AuthorizationType.valueOf(delegate.getAuthorizationType().toString()));
             }
         } else {
-            delegateResponse.value = delegateFactory.createResponse();
             delegateResponse.value.setExceptionMessage(delegateFactory
                     .createResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
@@ -137,6 +152,16 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     @Override
     public void handleAuthorization(String delegateId, String principalId, List<String> issues, String service,
             String endUserId, String requestId, Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
+
+        authorizationResponseHolder.value = authorizationFactory.createRovaAuthorizationResponse();
+
+        if (!HetuUtils.isHetuValid(delegateId) || !HetuUtils.isHetuValid(principalId)) {
+            authorizationResponseHolder.value.setExceptionMessage(authorizationFactory
+                    .createRovaAuthorizationResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
+                            new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
+            LOG.error("Got invalid handleAuthorization request: " + INVALID_HETU_MSG +" "+ delegateId +"/"+ principalId);
+            return;
+        }
 
         WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/xroad/" + service
                 + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
@@ -155,7 +180,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         if (response.getStatus() == HttpStatus.OK.value()) {
             Authorization auth = response.readEntity(Authorization.class);
 
-            authorizationResponseHolder.value = authorizationFactory.createRovaAuthorizationResponse();
             authorizationResponseHolder.value.setAuthorization(AuthorizationType.fromValue(auth.getResult().toString()));
 
             if (auth.getReasons() != null) {
@@ -167,7 +191,6 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                 }
             }
         } else {
-            authorizationResponseHolder.value = authorizationFactory.createRovaAuthorizationResponse();
             authorizationResponseHolder.value.setExceptionMessage(authorizationFactory
                     .createRovaAuthorizationResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
@@ -178,6 +201,15 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     public void handleOrganizationalRoles(String personId, List<String> organizationIds, String service,
                                           String endUserId, String requestId,
                                           Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
+        rolesResponseHolder.value = organizationalRolesFactory.createResponse();
+
+        if (!HetuUtils.isHetuValid(personId)) {
+            rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory
+                    .createResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
+                            new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
+            LOG.error("Got invalid handleOrganizationalRoles request: " + INVALID_HETU_MSG +" "+ personId);
+            return;
+        }
 
         WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + ServiceIdType.XROAD.getText() + "/" + service + "/" + personId);
         webTarget.queryParam("requestId", requestId);
@@ -217,10 +249,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                 organizationalRoles.add(ort);
             }
             
-            rolesResponseHolder.value = organizationalRolesFactory.createResponse();
             rolesResponseHolder.value.setOrganizationList(organizationListType);
         } else {
-            rolesResponseHolder.value = organizationalRolesFactory.createResponse();
             rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory
                     .createResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
