@@ -43,7 +43,7 @@ public class EngineDataProviderTest {
 
     private static final String REQUEST_ID = "test-request-id-5-1-2016";
     private static final String DELEGATE_ID = "150245-951K";
-    private static final String PRINCIPAL_ID = "010144-002E";
+    private static final String PRINCIPAL_ID = "010144-002V";
     private static final String END_USER = "test-end-user";
     private static final String SERVICE_IDENTIFIER = "FI-DEV_COM_1516651-3_kaparova";
     private static final String ENGINE_URL = "http://höpöhpö:8001/rest/";
