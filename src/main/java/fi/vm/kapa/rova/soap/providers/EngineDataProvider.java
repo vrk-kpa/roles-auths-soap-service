@@ -229,26 +229,19 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
             List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
 
-            if (roles != null) {
-                for (OrganizationResult organizationResult : roles) {
-                    OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType();
-                    ort.setName(organizationResult.getName());
-                    ort.setOrganizationIdentifier(organizationResult.getIdentifier());
-                    RoleList roleList = organizationalRolesFactory.createRoleList();
-                    for (ResultRoleType rt : organizationResult.getRoles()) {
-                        roleList.getRole().add(rt.toString());
-                    }
-                    ort.setRoles(roleList);
-
-                    organizationalRoles.add(ort);
-                }
-            } else {
-                OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType(); 
+            for (OrganizationResult organizationResult : roles) {
+                OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType();
+                ort.setName(organizationResult.getName());
+                ort.setOrganizationIdentifier(organizationResult.getIdentifier());
                 RoleList roleList = organizationalRolesFactory.createRoleList();
+                for (ResultRoleType rt : organizationResult.getRoles()) {
+                    roleList.getRole().add(rt.toString());
+                }
                 ort.setRoles(roleList);
+
                 organizationalRoles.add(ort);
             }
-            
+
             rolesResponseHolder.value.setOrganizationList(organizationListType);
         } else {
             rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory

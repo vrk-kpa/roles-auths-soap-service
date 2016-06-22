@@ -22,6 +22,15 @@
  */
 package fi.vm.kapa.rova.soap;
 
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.developer.JAXWSProperties;
+import fi.vm.kapa.rova.logging.Logger;
+import fi.vm.kapa.rova.soap.model.ClientHeader;
+import fi.vm.kapa.rova.soap.providers.DataProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBContext;
@@ -31,17 +40,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceContext;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
-
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.developer.JAXWSProperties;
-
-import fi.vm.kapa.rova.logging.Logger;
-import fi.vm.kapa.rova.soap.model.ClientHeader;
-import fi.vm.kapa.rova.soap.providers.DataProvider;
 
 abstract class AbstractSoapService extends SpringBeanAutowiringSupport {
 
@@ -81,5 +79,4 @@ abstract class AbstractSoapService extends SpringBeanAutowiringSupport {
         }
         return result;
     }
-
 }
