@@ -86,9 +86,9 @@ public class VareDataProvider implements SpringProperties { // DataProvider,
         
         LOG.info(": delegateId="+ delegateId +", principalId="+ principalId +", issues="+ sb.toString() +", subject="+ subject);
         
-        WebTarget webTarget = getClient().target(vareUrl +"vare/checkmandate/"+ endUserId +"/"
-        + delegateId +"/"+ principalId +"/"+ subject).queryParam("requestId", requestId) // TODO requestId necessary here ???
-        .queryParam("issues", issues);
+        WebTarget webTarget = getClient().target(vareUrl + "vare/checkmandate/" + delegateId + "/" + principalId
+                + "/" + subject).queryParam("requestId", requestId) // TODO requestId necessary here ???
+                .queryParam("issues", issues);
         
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
        
