@@ -1,5 +1,5 @@
 # Pull base image
-FROM ubuntu@sha256:eae3725cb06909d017a06a813b9530006187fcce82cf45005b94a34c8cf43f8d
+FROM docker-registry.kapa.ware.fi/roles-auths-java-base@sha256:84db8eb95099600b8fe3b0d072145da6a679cd2646b559ac3d2ddbea2717805a
 
 # Install common tools
 RUN \
