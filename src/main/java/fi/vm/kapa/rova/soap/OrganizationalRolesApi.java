@@ -22,25 +22,18 @@
  */
 package fi.vm.kapa.rova.soap;
 
-import static fi.vm.kapa.rova.logging.Logger.Field.*;
-import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
-
-import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.rova.logging.Logger;
-import fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory;
-import fi.vm.kapa.xml.rova.api.orgroles.Request;
-import fi.vm.kapa.xml.rova.api.orgroles.Response;
-import fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType;
+import fi.vm.kapa.xml.rova.api.orgroles.*;
 import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
 import javax.xml.bind.JAXBElement;
 import javax.xml.ws.Holder;
-
 import java.util.List;
+
+import static fi.vm.kapa.rova.logging.Logger.Field.*;
+import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType")
 @Component("rovaOrganizationalRolesService")
@@ -114,8 +107,10 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
     private String convertToString(List<OrganizationalRolesType> organizations) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
+
         for (OrganizationalRolesType orgRolesType : organizations) {
             sb.append("{");
+
             sb.append("organization_roles=[");
             if (orgRolesType.getRoles() != null && orgRolesType.getRoles().getRole() != null) {
                 sb.append(String.join(", ", orgRolesType.getRoles().getRole()));
@@ -124,11 +119,14 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
             sb.append(orgRolesType.getName());
             sb.append(", organization_id=");
             sb.append(orgRolesType.getOrganizationIdentifier());
+
             sb.append("}, ");
         }
-        if (", ".equals(sb.substring(sb.length() - 2))) {
+
+        if (sb.toString().endsWith(", ")) {
             sb.delete(sb.length() - 2, sb.length());
         }
+
         sb.append("]");
 
         return sb.toString();
