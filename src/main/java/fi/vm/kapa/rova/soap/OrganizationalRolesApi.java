@@ -22,23 +22,25 @@
  */
 package fi.vm.kapa.rova.soap;
 
-import static fi.vm.kapa.rova.logging.Logger.Field.DURATION;
-import static fi.vm.kapa.rova.logging.Logger.Field.END_USER;
-import static fi.vm.kapa.rova.logging.Logger.Field.RESULT;
-import static fi.vm.kapa.rova.logging.Logger.Field.SERVICE_ID;
-import static fi.vm.kapa.rova.logging.Logger.Field.SERVICE_REQUEST_IDENTIFIER;
+import static fi.vm.kapa.rova.logging.Logger.Field.*;
 import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import javax.jws.WebService;
-import javax.xml.ws.Holder;
+import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 
-import org.springframework.stereotype.Component;
-
+import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory;
 import fi.vm.kapa.xml.rova.api.orgroles.Request;
 import fi.vm.kapa.xml.rova.api.orgroles.Response;
 import fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType;
+import org.springframework.stereotype.Component;
+
+import javax.jws.WebService;
+import javax.xml.bind.JAXBElement;
+import javax.xml.ws.Holder;
+
+import java.util.List;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.orgroles.RovaOrganizationalRolesPortType")
 @Component("rovaOrganizationalRolesService")
@@ -89,12 +91,47 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
         logMap.add(DURATION, Long.toString(endTime - startTime));
 
         if (response.value != null) {
-            logMap.add(RESULT, response.value.getOrganizationList());
+            JAXBElement<String> expMsgElement = response.value.getExceptionMessage();
+            if (expMsgElement != null && isNotBlank(expMsgElement.getValue())) {
+                logMap.add(ERRORSTR, expMsgElement.getValue());
+                logMap.level(ERROR);
+            }
+
+            OrganizationListType orgListType = response.value.getOrganizationList();
+            if (orgListType != null && orgListType.getOrganization() != null) {
+                logMap.add(RESULT, convertToString(orgListType.getOrganization()));
+            } else {
+                logMap.add(RESULT, "no_valid_response");
+                logMap.level(ERROR);
+            }
         } else {
             logMap.add(RESULT, "no_valid_response");
             logMap.level(ERROR);
         }
         logMap.log();
+    }
+
+    private String convertToString(List<OrganizationalRolesType> organizations) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (OrganizationalRolesType orgRolesType : organizations) {
+            sb.append("{");
+            sb.append("organization_roles=[");
+            if (orgRolesType.getRoles() != null && orgRolesType.getRoles().getRole() != null) {
+                sb.append(String.join(", ", orgRolesType.getRoles().getRole()));
+            }
+            sb.append("], organization_name=");
+            sb.append(orgRolesType.getName());
+            sb.append(", organization_id=");
+            sb.append(orgRolesType.getOrganizationIdentifier());
+            sb.append("}, ");
+        }
+        if (", ".equals(sb.substring(sb.length() - 2))) {
+            sb.delete(sb.length() - 2, sb.length());
+        }
+        sb.append("]");
+
+        return sb.toString();
     }
 
 }
