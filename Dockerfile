@@ -8,4 +8,4 @@ ADD service.properties.template /opt/rova/roles-auths-soap-service/
 WORKDIR /opt/rova/roles-auths-soap-service/
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "roles-auths-soap-service.jar"]
+ENTRYPOINT ["java", "-Dfile.encoding=UTF-8", "-jar", "roles-auths-soap-service.jar"]
