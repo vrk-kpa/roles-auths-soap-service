@@ -48,4 +48,4 @@ then
 		fi
 	done < pom.xml`
 fi
-java -Dserver.port=$server_port $logging $debug -jar $jar_file
+java -Dserver.port=$server_port -Xmx256m $logging $debug -jar $jar_file
