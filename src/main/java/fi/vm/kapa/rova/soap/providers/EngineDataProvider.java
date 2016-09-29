@@ -22,6 +22,27 @@
  */
 package fi.vm.kapa.rova.soap.providers;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.xml.ws.Holder;
+
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
 import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.model.hpa.Authorization;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
@@ -44,42 +65,18 @@ import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
 
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.xml.ws.Holder;
-
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
 
-    Logger LOG = Logger.getLogger(EngineDataProvider.class);
+    private static final String INCOMPLETE = "incomplete";
     public static final String INVALID_HETU_MSG = "Invalid hetu.";
+
+    Logger LOG = Logger.getLogger(EngineDataProvider.class);
 
     private fi.vm.kapa.xml.rova.api.authorization.ObjectFactory authorizationFactory = new fi.vm.kapa.xml.rova.api.authorization.ObjectFactory();
     private fi.vm.kapa.xml.rova.api.delegate.ObjectFactory delegateFactory = new fi.vm.kapa.xml.rova.api.delegate.ObjectFactory();
     private fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory organizationalRolesFactory = new fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory();
-   
-    
+
     @Value(ENGINE_URL)
     private String engineUrl;
 
@@ -98,18 +95,17 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         }
 
         if (!HetuUtils.isHetuValid(personId)) {
-            delegateResponse.value.setExceptionMessage(delegateFactory
-                    .createResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
+            delegateResponse.value.setExceptionMessage(
+                    delegateFactory.createResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
                             new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
-            LOG.error("Got invalid handleDelegate request: "+ INVALID_HETU_MSG +" "+ personId);
+            LOG.error("Got invalid handleDelegate request: " + INVALID_HETU_MSG + " " + personId);
             return;
         }
 
-        WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/xroad/" + service + "/"
-                + personId).queryParam("requestId", requestId);
-        
+        WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/xroad/" + service + "/" + personId).queryParam("requestId", requestId);
+
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
-       
+
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
         Response response = invocationBuilder.get();
@@ -139,19 +135,17 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             }
 
             if (delegate.getAuthorizationType() != null) {
-                delegateResponse.value.setAuthorization(
-                        fi.vm.kapa.xml.rova.api.delegate.AuthorizationType.valueOf(delegate.getAuthorizationType().toString()));
+                delegateResponse.value.setAuthorization(fi.vm.kapa.xml.rova.api.delegate.AuthorizationType.valueOf(delegate.getAuthorizationType().toString()));
             }
         } else {
-            delegateResponse.value.setExceptionMessage(delegateFactory
-                    .createResponseExceptionMessage(createExceptionMessage(response)));
+            delegateResponse.value.setExceptionMessage(delegateFactory.createResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
         }
     }
 
     @Override
-    public void handleAuthorization(String delegateId, String principalId, List<String> issues, String service,
-            String endUserId, String requestId, Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
+    public void handleAuthorization(String delegateId, String principalId, List<String> issues, String service, String endUserId, String requestId,
+            Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
 
         authorizationResponseHolder.value = authorizationFactory.createRovaAuthorizationResponse();
 
@@ -159,19 +153,19 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             authorizationResponseHolder.value.setExceptionMessage(authorizationFactory
                     .createRovaAuthorizationResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
                             new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
-            LOG.error("Got invalid handleAuthorization request: " + INVALID_HETU_MSG +" "+ delegateId +"/"+ principalId);
+            LOG.error("Got invalid handleAuthorization request: " + INVALID_HETU_MSG + " " + delegateId + "/" + principalId);
             return;
         }
 
-        WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/xroad/" + service
-                + "/" + delegateId + "/" + principalId).queryParam("requestId", requestId);
+        WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/xroad/" + service + "/" + delegateId + "/" + principalId)
+                .queryParam("requestId", requestId);
 
         if (issues != null) {
-            for(String issue : issues) {
+            for (String issue : issues) {
                 webTarget = webTarget.queryParam("issue", issue);
             }
         }
-        
+
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
@@ -191,23 +185,23 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                 }
             }
         } else {
-            authorizationResponseHolder.value.setExceptionMessage(authorizationFactory
-                    .createRovaAuthorizationResponseExceptionMessage(createExceptionMessage(response)));
+            authorizationResponseHolder.value
+                    .setExceptionMessage(authorizationFactory.createRovaAuthorizationResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
         }
     }
 
     @Override
-    public void handleOrganizationalRoles(String personId, List<String> organizationIds, String service,
-                                          String endUserId, String requestId,
-                                          Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
+    public void handleOrganizationalRoles(String personId, List<String> organizationIds, String service, String endUserId, String requestId,
+            Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
         rolesResponseHolder.value = organizationalRolesFactory.createResponse();
+        boolean complete = true;
 
         if (!HetuUtils.isHetuValid(personId)) {
-            rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory
-                    .createResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
+            rolesResponseHolder.value.setExceptionMessage(
+                    organizationalRolesFactory.createResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
                             new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
-            LOG.error("Got invalid handleOrganizationalRoles request: " + INVALID_HETU_MSG +" "+ personId);
+            LOG.error("Got invalid handleOrganizationalRoles request: " + INVALID_HETU_MSG + " " + personId);
             return;
         }
 
@@ -215,7 +209,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         webTarget.queryParam("requestId", requestId);
         if (organizationIds != null) {
             for (Iterator<String> iterator = organizationIds.iterator(); iterator.hasNext();) {
-               webTarget = webTarget.queryParam("organizationId", iterator.next());
+                webTarget = webTarget.queryParam("organizationId", iterator.next());
             }
         }
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
@@ -224,13 +218,19 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         Response response = invocationBuilder.get();
 
         if (response.getStatus() == HttpStatus.OK.value()) {
-            List<OrganizationResult> roles = response.readEntity(new GenericType<List<OrganizationResult>>() {});
+            List<OrganizationResult> roles = response.readEntity(new GenericType<List<OrganizationResult>>() {
+            });
 
             OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
             List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
 
             for (OrganizationResult organizationResult : roles) {
                 OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType();
+
+                if (!organizationResult.isComplete()) {
+                    complete = false;
+                }
+
                 ort.setName(organizationResult.getName());
                 ort.setOrganizationIdentifier(organizationResult.getIdentifier());
                 RoleList roleList = organizationalRolesFactory.createRoleList();
@@ -243,12 +243,16 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             }
 
             rolesResponseHolder.value.setOrganizationList(organizationListType);
+
+            if (!complete) {
+                rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory.createResponseExceptionMessage(INCOMPLETE));
+                LOG.info("Result is not complete");
+            }
+
         } else {
-            rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory
-                    .createResponseExceptionMessage(createExceptionMessage(response)));
+            rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory.createResponseExceptionMessage(createExceptionMessage(response)));
             LOG.error("Got error response from engine: " + response.getStatus());
         }
-        
     }
 
     void setEngineUrl(String engineUrl) {
@@ -265,15 +269,12 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
     private String createExceptionMessage(Response response) {
         Map<String, String> attributes = getAttributes(response);
-        
-        return String.format("RequestId: %s, Date: %s, Status: %d %s, Message: %s",
-                valueOrDefault(attributes.get(Logger.REQUEST_ID), "NO_SESSION"),
-                response.getDate().toString(),
-                response.getStatusInfo().getStatusCode(),
-                response.getStatusInfo().getReasonPhrase(),
+
+        return String.format("RequestId: %s, Date: %s, Status: %d %s, Message: %s", valueOrDefault(attributes.get(Logger.REQUEST_ID), "NO_SESSION"),
+                response.getDate().toString(), response.getStatusInfo().getStatusCode(), response.getStatusInfo().getReasonPhrase(),
                 valueOrDefault(attributes.get("errorMessage"), "(none)"));
     }
-    
+
     private String valueOrDefault(String value, String defaultValue) {
         return isNotBlank(value) ? value : defaultValue;
     }
