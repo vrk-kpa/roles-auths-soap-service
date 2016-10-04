@@ -65,6 +65,8 @@ import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
 
+import static fi.vm.kapa.rova.utils.EncodingUtils.encodePathParam;
+
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
 
@@ -102,7 +104,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             return;
         }
 
-        WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/xroad/" + service + "/" + personId).queryParam("requestId", requestId);
+        WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/xroad/" + service + "/" +
+                encodePathParam(personId)).queryParam("requestId", requestId);
 
         webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
 
@@ -157,8 +160,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             return;
         }
 
-        WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/xroad/" + service + "/" + delegateId + "/" + principalId)
-                .queryParam("requestId", requestId);
+        WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/xroad/" + service + "/" +
+                encodePathParam(delegateId) + "/" + encodePathParam(principalId)).queryParam("requestId", requestId);
 
         if (issues != null) {
             for (String issue : issues) {
@@ -205,7 +208,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             return;
         }
 
-        WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + ServiceIdType.XROAD.getText() + "/" + service + "/" + personId);
+        WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + ServiceIdType.XROAD.getText() + "/" +
+                service + "/" + encodePathParam(personId));
         webTarget.queryParam("requestId", requestId);
         if (organizationIds != null) {
             for (Iterator<String> iterator = organizationIds.iterator(); iterator.hasNext();) {
