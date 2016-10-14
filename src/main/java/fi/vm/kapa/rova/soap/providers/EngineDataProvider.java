@@ -49,7 +49,7 @@ import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
 import fi.vm.kapa.rova.engine.model.hpa.Delegate;
 import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
-import fi.vm.kapa.rova.engine.model.ypa.ResultRoleType;
+import fi.vm.kapa.rova.external.model.IResultType;
 import fi.vm.kapa.rova.external.model.ServiceIdType;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
@@ -238,8 +238,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                 ort.setName(organizationResult.getName());
                 ort.setOrganizationIdentifier(organizationResult.getIdentifier());
                 RoleList roleList = organizationalRolesFactory.createRoleList();
-                for (ResultRoleType rt : organizationResult.getRoles()) {
-                    roleList.getRole().add(rt.toString());
+                for (IResultType rt : organizationResult.getRoles()) {
+                    roleList.getRole().add(rt.getResult());
                 }
                 ort.setRoles(roleList);
 
