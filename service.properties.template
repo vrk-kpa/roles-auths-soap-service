@@ -7,6 +7,7 @@ request_alive_seconds=5
 
 logstash.host={{ logstash_host }}
 logstash.port={{ logstash_port }}
+logstash.accesslog.port={{ logstash_accesslog_port }}
 logstash.level=INFO
 
 wsdl_filter_request_path={{ wsdl_filter_request_path }}
