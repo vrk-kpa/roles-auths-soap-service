@@ -22,27 +22,6 @@
  */
 package fi.vm.kapa.rova.soap.providers;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.xml.ws.Holder;
-
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
 import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.model.hpa.Authorization;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
@@ -64,8 +43,26 @@ import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.xml.ws.Holder;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static fi.vm.kapa.rova.utils.EncodingUtils.encodePathParam;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
@@ -107,7 +104,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/xroad/" + service + "/" +
                 encodePathParam(personId)).queryParam("requestId", requestId);
 
-        webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
+        webTarget.register(new RequestIdentificationFilter(requestId, endUserId, RequestIdentificationFilter.HeaderTrust.DONT_TRUST_REQUEST_HEADERS));
 
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
@@ -169,7 +166,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             }
         }
 
-        webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
+        webTarget.register(new RequestIdentificationFilter(requestId, endUserId, RequestIdentificationFilter.HeaderTrust.DONT_TRUST_REQUEST_HEADERS));
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
         Response response = invocationBuilder.get();
@@ -216,7 +213,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                 webTarget = webTarget.queryParam("organizationId", iterator.next());
             }
         }
-        webTarget.register(new RequestIdentificationFilter(requestId, endUserId));
+        webTarget.register(new RequestIdentificationFilter(requestId, endUserId, RequestIdentificationFilter.HeaderTrust.DONT_TRUST_REQUEST_HEADERS));
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
         Response response = invocationBuilder.get();
