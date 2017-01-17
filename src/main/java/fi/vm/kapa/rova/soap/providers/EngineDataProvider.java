@@ -134,8 +134,10 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                 }
             }
 
-            if (delegate.getAuthorizationType() != null) {
-                delegateResponse.value.setAuthorization(fi.vm.kapa.xml.rova.api.delegate.AuthorizationType.valueOf(delegate.getAuthorizationType().toString()));
+            if (delegate.getAuthorizationType() != null &&
+                    delegate.getAuthorizationType() != fi.vm.kapa.rova.external.model.AuthorizationType.UNKNOWN) {
+                delegateResponse.value.setAuthorization(fi.vm.kapa.xml.rova.api.delegate.AuthorizationType.valueOf(
+                        delegate.getAuthorizationType().toString()));
             }
         } else {
             delegateResponse.value.setExceptionMessage(delegateFactory.createResponseExceptionMessage(createExceptionMessage(response)));
