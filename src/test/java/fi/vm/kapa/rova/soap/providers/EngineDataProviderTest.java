@@ -22,22 +22,36 @@
  */
 package fi.vm.kapa.rova.soap.providers;
 
+import fi.vm.kapa.rova.engine.Hpa;
+import fi.vm.kapa.rova.engine.HpaClient;
+import fi.vm.kapa.rova.engine.YpaClient;
+import fi.vm.kapa.rova.engine.model.hpa.Authorization;
+import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
+import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
+import fi.vm.kapa.rova.engine.model.hpa.Principal;
+import fi.vm.kapa.rova.external.model.AuthorizationType;
+import fi.vm.kapa.rova.external.model.ServiceIdType;
 import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.actuate.autoconfigure.ShellProperties;
+import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.*;
 import javax.ws.rs.core.Link.Builder;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.xml.ws.Holder;
 import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.util.*;
+
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.anyString;
 
 public class EngineDataProviderTest {
 
@@ -46,228 +60,76 @@ public class EngineDataProviderTest {
     private static final String PRINCIPAL_ID = "010144-002V";
     private static final String END_USER = "test-end-user";
     private static final String SERVICE_IDENTIFIER = "FI-DEV_COM_1516651-3_kaparova";
-    private static final String ENGINE_URL = "http://höpöhpö:8001/rest/";
 
     @Test
     public void testHandleDelegateRestRequest() {
 
-        List<Object> mocks = getMocks(ENGINE_URL + "hpa/delegate/xroad/"
-                + SERVICE_IDENTIFIER + "/" + DELEGATE_ID);
+        EngineDataProvider provider = new EngineDataProvider();
+        HpaClient hpaClient = EasyMock.createMock(HpaClient.class);
+        EasyMock.expect(hpaClient.getDelegate(anyString(), anyString(), anyString()))
+                .andReturn(getInvocationResponse(getHpaDelegate())).once();
+        EasyMock.replay(hpaClient);
+        provider.setHpaClient(hpaClient);
 
-        EngineDataProvider engineDataProvider = getEnginedataProvider((Client) mocks.get(0));
-        Holder<fi.vm.kapa.xml.rova.api.delegate.Response> responseHolder = 
-                new Holder<fi.vm.kapa.xml.rova.api.delegate.Response>(null);
-        EasyMock.replay(mocks.toArray());
-        engineDataProvider.handleDelegate(DELEGATE_ID, SERVICE_IDENTIFIER, END_USER, REQUEST_ID, responseHolder);
-        EasyMock.verify(mocks.toArray());
+        Holder<fi.vm.kapa.xml.rova.api.delegate.Response> responseHolder = new Holder<>(null);
+
+        provider.handleDelegate(DELEGATE_ID, SERVICE_IDENTIFIER, END_USER, REQUEST_ID, responseHolder);
+        EasyMock.verify(hpaClient);
         Assert.assertNotNull(responseHolder.value);
     }
 
     @Test
     public void testHandleAuthorizationRequest() {
-        List<Object> mocks = getMocks(ENGINE_URL + "hpa/authorization/xroad/"
-                + SERVICE_IDENTIFIER + "/" + DELEGATE_ID + "/" + PRINCIPAL_ID);
-        
-        EngineDataProvider engineDataProvider = getEnginedataProvider((Client) mocks.get(0));
-        Holder<fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse> responseHolder = 
+        EngineDataProvider provider = new EngineDataProvider();
+        HpaClient hpaClient = EasyMock.createMock(HpaClient.class);
+        EasyMock.expect(hpaClient.getAuthorization(anyString(), anyString(), anyString(), anyString(), anyObject()))
+                .andReturn(getInvocationResponse(getAuthorization())).once();
+        EasyMock.replay(hpaClient);
+        provider.setHpaClient(hpaClient);
+
+        Holder<fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse> responseHolder =
                 new Holder<fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse>(null);
-        EasyMock.replay(mocks.toArray());
-        engineDataProvider.handleAuthorization(DELEGATE_ID, PRINCIPAL_ID, Collections.emptyList(),
+
+        provider.handleAuthorization(DELEGATE_ID, PRINCIPAL_ID, Collections.emptyList(),
                 SERVICE_IDENTIFIER, END_USER, REQUEST_ID, responseHolder);
-        EasyMock.verify(mocks.toArray());
+        EasyMock.verify(hpaClient);
         Assert.assertNotNull(responseHolder.value);
     }
 
-    private EngineDataProvider getEnginedataProvider(Client clientMock) {
-        EngineDataProvider engineDataProvider = new EngineDataProvider() {
+    private <T> ResponseEntity<T> getInvocationResponse(T object) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setDate(new Date().getTime());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return ResponseEntity.ok(object);
+    }
+
+    private HpaDelegate getHpaDelegate() {
+        return new HpaDelegate() {
             @Override
-            protected Client getClient() {
-                return clientMock;
+            public String getDelegateId() {
+                return DELEGATE_ID;
+            }
+
+            @Override
+            public AuthorizationType getAuthorizationType() {
+                return AuthorizationType.ALLOWED;
+            }
+
+            @Override
+            public List<Principal> getPrincipal() {
+                return new ArrayList<>();
+            }
+
+            @Override
+            public List<DecisionReason> getReasons() {
+                return new ArrayList<>();
             }
         };
-        engineDataProvider.setEngineApiKey("abcdefghijklmn");
-        engineDataProvider.setEngineUrl(ENGINE_URL);
-        engineDataProvider.setRequestAliveSeconds(50);
-
-        return engineDataProvider;
     }
 
-    private List<Object> getMocks(String expectedUrl) {
-        List<Object> mocks = new ArrayList<>();
-
-        Client clientMock = EasyMock.createStrictMock(Client.class);
-
-        WebTarget webTargetMock = EasyMock.createStrictMock(WebTarget.class);
-        EasyMock.expect(clientMock.target(expectedUrl)).andReturn(webTargetMock).once();
-        EasyMock.expect(webTargetMock.queryParam("requestId", REQUEST_ID)).andReturn(webTargetMock).once();
-        EasyMock.expect(webTargetMock.register(EasyMock.anyObject(RequestIdentificationFilter.class)))
-                .andReturn(webTargetMock).once();
-
-        Invocation.Builder invocationBuilderMock = EasyMock.createStrictMock(Invocation.Builder.class);
-        EasyMock.expect(webTargetMock.request(MediaType.APPLICATION_JSON)).andReturn(invocationBuilderMock).once();
-        EasyMock.expect(invocationBuilderMock.get()).andReturn(getInvocationResponse()).once();
-
-        mocks.add(clientMock);
-        mocks.add(webTargetMock);
-        mocks.add(invocationBuilderMock);
-
-        return mocks;
+    private Authorization getAuthorization() {
+        Authorization auth = new Authorization();
+        auth.setResult(AuthorizationType.ALLOWED);
+        return auth;
     }
-
-    private javax.ws.rs.core.Response getInvocationResponse() {
-        javax.ws.rs.core.Response resp = new javax.ws.rs.core.Response() {
-
-            @Override
-            public int getStatus() {
-                return HttpStatus.FOUND.value();
-            }
-
-            @Override
-            public StatusType getStatusInfo() {
-                StatusType statusType = new StatusType() {
-
-                    @Override
-                    public int getStatusCode() {
-                        return getStatus();
-                    }
-
-                    @Override
-                    public String getReasonPhrase() {
-                        return "Reason from mocked response";
-                    }
-
-                    @Override
-                    public Family getFamily() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-                return statusType;
-            }
-
-            @Override
-            public Object getEntity() {
-                return new Object();
-            }
-
-            @Override
-            public <T> T readEntity(Class<T> entityType) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public <T> T readEntity(GenericType<T> entityType) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public <T> T readEntity(Class<T> entityType,
-                    Annotation[] annotations) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public <T> T readEntity(GenericType<T> entityType,
-                    Annotation[] annotations) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean hasEntity() {
-                return false;
-            }
-
-            @Override
-            public boolean bufferEntity() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void close() {
-
-            }
-
-            @Override
-            public MediaType getMediaType() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Locale getLanguage() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public int getLength() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Set<String> getAllowedMethods() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Map<String, NewCookie> getCookies() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public EntityTag getEntityTag() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Date getDate() {
-                return new Date();
-            }
-
-            @Override
-            public Date getLastModified() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public URI getLocation() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Set<Link> getLinks() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean hasLink(String relation) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Link getLink(String relation) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Builder getLinkBuilder(String relation) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public MultivaluedMap<String, Object> getMetadata() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public MultivaluedMap<String, String> getStringHeaders() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public String getHeaderString(String name) {
-                throw new UnsupportedOperationException();
-            }
-
-        };
-        return resp;
-    }
-
 }
