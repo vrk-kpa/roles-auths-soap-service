@@ -23,17 +23,15 @@
 package fi.vm.kapa.rova.soap.providers;
 
 import fi.vm.kapa.rova.config.SpringProperties;
+import fi.vm.kapa.rova.engine.HpaClient;
+import fi.vm.kapa.rova.engine.YpaClient;
 import fi.vm.kapa.rova.engine.model.hpa.Authorization;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
-import fi.vm.kapa.rova.engine.model.hpa.Delegate;
 import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
 import fi.vm.kapa.rova.external.model.IResultType;
 import fi.vm.kapa.rova.external.model.ServiceIdType;
 import fi.vm.kapa.rova.logging.Logger;
-import fi.vm.kapa.rova.logging.LoggingClientRequestFilter;
-import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
-import fi.vm.kapa.rova.rest.validation.ValidationClientRequestFilter;
 import fi.vm.kapa.rova.utils.HetuUtils;
 import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
 import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
@@ -43,25 +41,18 @@ import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationalRolesType;
 import fi.vm.kapa.xml.rova.api.orgroles.RoleList;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.ws.Holder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static fi.vm.kapa.rova.utils.EncodingUtils.encodePathParam;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
@@ -76,14 +67,11 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     private fi.vm.kapa.xml.rova.api.delegate.ObjectFactory delegateFactory = new fi.vm.kapa.xml.rova.api.delegate.ObjectFactory();
     private fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory organizationalRolesFactory = new fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory();
 
-    @Value(ENGINE_URL)
-    private String engineUrl;
+    @Autowired
+    HpaClient hpaClient;
 
-    @Value(ENGINE_API_KEY)
-    private String engineApiKey;
-
-    @Value(REQUEST_ALIVE_SECONDS)
-    private Integer requestAliveSeconds;
+    @Autowired
+    YpaClient ypaClient;
 
     @Override
     public void handleDelegate(String personId, String service, String endUserId, String requestId,
@@ -101,17 +89,10 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             return;
         }
 
-        WebTarget webTarget = getClient().target(engineUrl + "hpa/delegate/xroad/" + service + "/" +
-                encodePathParam(personId)).queryParam("requestId", requestId);
+        ResponseEntity<HpaDelegate> response = hpaClient.getDelegate(ServiceIdType.XROAD.toString(), personId, service);
 
-        webTarget.register(new RequestIdentificationFilter(requestId, endUserId, RequestIdentificationFilter.HeaderTrust.DONT_TRUST_REQUEST_HEADERS));
-
-        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
-
-        Response response = invocationBuilder.get();
-
-        if (response.getStatus() == HttpStatus.OK.value()) {
-            HpaDelegate delegate = response.readEntity(Delegate.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            HpaDelegate delegate = response.getBody();
             Principal principal = delegateFactory.createPrincipal();
 
             List<PrincipalType> principals = principal.getPrincipal();
@@ -141,7 +122,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             }
         } else {
             delegateResponse.value.setExceptionMessage(delegateFactory.createResponseExceptionMessage(createExceptionMessage(response)));
-            LOG.error("Got error response from engine: " + response.getStatus());
+            LOG.error("Got error response from engine: " + response.getStatusCodeValue());
         }
     }
 
@@ -159,22 +140,12 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             return;
         }
 
-        WebTarget webTarget = getClient().target(engineUrl + "hpa/authorization/xroad/" + service + "/" +
-                encodePathParam(delegateId) + "/" + encodePathParam(principalId)).queryParam("requestId", requestId);
+        Set<String> issueSet = (issues != null) ? new HashSet<>(issues) : null;
 
-        if (issues != null) {
-            for (String issue : issues) {
-                webTarget = webTarget.queryParam("issue", issue);
-            }
-        }
+        ResponseEntity<Authorization> response = hpaClient.getAuthorization(ServiceIdType.XROAD.toString(), service, delegateId, principalId, issueSet);
 
-        webTarget.register(new RequestIdentificationFilter(requestId, endUserId, RequestIdentificationFilter.HeaderTrust.DONT_TRUST_REQUEST_HEADERS));
-        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
-
-        Response response = invocationBuilder.get();
-
-        if (response.getStatus() == HttpStatus.OK.value()) {
-            Authorization auth = response.readEntity(Authorization.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            Authorization auth = response.getBody();
 
             authorizationResponseHolder.value.setAuthorization(AuthorizationType.fromValue(auth.getResult().toString()));
 
@@ -189,7 +160,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         } else {
             authorizationResponseHolder.value
                     .setExceptionMessage(authorizationFactory.createRovaAuthorizationResponseExceptionMessage(createExceptionMessage(response)));
-            LOG.error("Got error response from engine: " + response.getStatus());
+            LOG.error("Got error response from engine: " + response.getStatusCodeValue());
         }
     }
 
@@ -207,22 +178,10 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             return;
         }
 
-        WebTarget webTarget = getClient().target(engineUrl + "ypa/roles/" + ServiceIdType.XROAD.getText() + "/" +
-                service + "/" + encodePathParam(personId));
-        webTarget.queryParam("requestId", requestId);
-        if (organizationIds != null) {
-            for (Iterator<String> iterator = organizationIds.iterator(); iterator.hasNext();) {
-                webTarget = webTarget.queryParam("organizationId", iterator.next());
-            }
-        }
-        webTarget.register(new RequestIdentificationFilter(requestId, endUserId, RequestIdentificationFilter.HeaderTrust.DONT_TRUST_REQUEST_HEADERS));
-        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        ResponseEntity<List<OrganizationResult>> response = ypaClient.getRoles(personId, ServiceIdType.XROAD.toString(), service, organizationIds);
 
-        Response response = invocationBuilder.get();
-
-        if (response.getStatus() == HttpStatus.OK.value()) {
-            List<OrganizationResult> roles = response.readEntity(new GenericType<List<OrganizationResult>>() {
-            });
+        if (response.getStatusCode() == HttpStatus.OK) {
+            List<OrganizationResult> roles = response.getBody();
 
             OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
             List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
@@ -254,27 +213,18 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
         } else {
             rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory.createResponseExceptionMessage(createExceptionMessage(response)));
-            LOG.error("Got error response from engine: " + response.getStatus());
+            LOG.error("Got error response from engine: " + response.getStatusCodeValue());
         }
     }
 
-    void setEngineUrl(String engineUrl) {
-        this.engineUrl = engineUrl;
-    }
-
-    void setEngineApiKey(String engineApiKey) {
-        this.engineApiKey = engineApiKey;
-    }
-
-    void setRequestAliveSeconds(Integer requestAlive) {
-        this.requestAliveSeconds = requestAlive;
-    }
-
-    private String createExceptionMessage(Response response) {
+    private String createExceptionMessage(ResponseEntity<?> response) {
         Map<String, String> attributes = getAttributes(response);
+        HttpHeaders headers = response.getHeaders();
+        HttpStatus status = response.getStatusCode();
+        Date date = new Date(headers.getDate());
 
-        return String.format("RequestId: %s, Date: %s, Status: %d %s, Message: %s", valueOrDefault(attributes.get(Logger.REQUEST_ID), "NO_SESSION"),
-                response.getDate().toString(), response.getStatusInfo().getStatusCode(), response.getStatusInfo().getReasonPhrase(),
+        return String.format("RequestId: %s, Date: %s, Status: %d %s, Message: %s", valueOrDefault(attributes.get(Logger.REQUEST_ID),
+                "NO_SESSION"), date.toString(), status.value(), status.getReasonPhrase(),
                 valueOrDefault(attributes.get("errorMessage"), "(none)"));
     }
 
@@ -282,13 +232,13 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         return isNotBlank(value) ? value : defaultValue;
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, String> getAttributes(Response response) {
-        Object entity = null;
-        if (response.hasEntity()) {
-            LOG.error("Response mediatype: " + (response.getMediaType() != null ? response.getMediaType().toString() : "mediatype unavailable!"));
+    private <T> Map<String, String> getAttributes(ResponseEntity<T> response) {
+        T entity = null;
+        if (response.hasBody()) {
+            MediaType mediaType = response.getHeaders().getContentType();
+            LOG.error("Response mediatype: " + (mediaType != null ? mediaType.toString() : "mediatype unavailable!"));
             try {
-                entity = response.readEntity(Object.class);
+                entity = response.getBody();
             } catch (RuntimeException t) {
                 LOG.error("Response mediatype: " + t);
                 // eat
@@ -301,18 +251,11 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         return Collections.emptyMap();
     }
 
-    protected Client getClient() {
-        ClientConfig clientConfig = new ClientConfig();
-        Client client = ClientBuilder.newClient(clientConfig);
-        client.register(JacksonFeature.class);
-        client.register(new ValidationClientRequestFilter(engineApiKey, requestAliveSeconds, null));
-        client.register(new LoggingClientRequestFilter());
-        return client;
+    void setHpaClient(HpaClient hpaClient) {
+        this.hpaClient = hpaClient;
     }
 
-    @Override
-    public String toString() {
-        return "EngineDataProvider engine url: " + engineUrl;
+    void setYpaClient(YpaClient ypaClient) {
+        this.ypaClient = ypaClient;
     }
-
 }
