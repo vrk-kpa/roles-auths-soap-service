@@ -32,6 +32,7 @@ import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
 import fi.vm.kapa.rova.external.model.IResultType;
 import fi.vm.kapa.rova.external.model.ServiceIdType;
 import fi.vm.kapa.rova.logging.Logger;
+import fi.vm.kapa.rova.rest.identification.RequestIdentificationInterceptor;
 import fi.vm.kapa.rova.utils.HetuUtils;
 import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
 import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
@@ -47,9 +48,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.ws.rs.core.Response.Status;
 import javax.xml.ws.Holder;
+
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -89,6 +93,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             return;
         }
 
+        endUserToRequestContext(endUserId);
         ResponseEntity<HpaDelegate> response = hpaClient.getDelegate(ServiceIdType.XROAD.toString(), personId, service);
 
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -142,6 +147,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
         Set<String> issueSet = (issues != null) ? new HashSet<>(issues) : null;
 
+        endUserToRequestContext(endUserId);
         ResponseEntity<Authorization> response = hpaClient.getAuthorization(ServiceIdType.XROAD.toString(), service, delegateId, principalId, issueSet);
 
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -178,6 +184,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             return;
         }
 
+        endUserToRequestContext(endUserId);
         ResponseEntity<List<OrganizationResult>> response = ypaClient.getRoles(personId, ServiceIdType.XROAD.toString(), service, organizationIds);
 
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -249,6 +256,14 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         }
 
         return Collections.emptyMap();
+    }
+
+    private void endUserToRequestContext(String endUserId) {
+        RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
+        if (attrs != null) {
+            attrs.setAttribute(RequestIdentificationInterceptor.ORIG_END_USER, endUserId,
+                    RequestAttributes.SCOPE_REQUEST);
+        }
     }
 
     void setHpaClient(HpaClient hpaClient) {
