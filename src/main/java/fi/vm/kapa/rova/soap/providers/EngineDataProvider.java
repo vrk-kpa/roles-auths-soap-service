@@ -93,7 +93,9 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             return;
         }
 
-        endUserToRequestContext(endUserId);
+        origEndUserToRequestContext(endUserId);
+        origRequestIdToRequestContext(requestId);
+
         ResponseEntity<HpaDelegate> response = hpaClient.getDelegate(ServiceIdType.XROAD.toString(), personId, service);
 
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -147,7 +149,9 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
         Set<String> issueSet = (issues != null) ? new HashSet<>(issues) : null;
 
-        endUserToRequestContext(endUserId);
+        origEndUserToRequestContext(endUserId);
+        origRequestIdToRequestContext(requestId);
+
         ResponseEntity<Authorization> response = hpaClient.getAuthorization(ServiceIdType.XROAD.toString(), service, delegateId, principalId, issueSet);
 
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -184,7 +188,9 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             return;
         }
 
-        endUserToRequestContext(endUserId);
+        origEndUserToRequestContext(endUserId);
+        origRequestIdToRequestContext(requestId);
+
         ResponseEntity<List<OrganizationResult>> response = ypaClient.getRoles(personId, ServiceIdType.XROAD.toString(), service, organizationIds);
 
         if (response.getStatusCode() == HttpStatus.OK) {
@@ -258,10 +264,18 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         return Collections.emptyMap();
     }
 
-    private void endUserToRequestContext(String endUserId) {
+    private void origEndUserToRequestContext(String endUserId) {
         RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
         if (attrs != null) {
             attrs.setAttribute(RequestIdentificationInterceptor.ORIG_END_USER, endUserId,
+                    RequestAttributes.SCOPE_REQUEST);
+        }
+    }
+
+    private void origRequestIdToRequestContext(String origRequestId) {
+        RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
+        if (attrs != null) {
+            attrs.setAttribute(RequestIdentificationInterceptor.ORIG_REQUEST_IDENTIFIER, origRequestId,
                     RequestAttributes.SCOPE_REQUEST);
         }
     }
