@@ -81,19 +81,19 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     YpaClient ypaClient;
 
     @Override
-    public void handleDelegate(String personId, String service, String endUserId, String requestId,
+    public String handleDelegate(String personId, String service, String endUserId, String requestId,
             Holder<fi.vm.kapa.xml.rova.api.delegate.Response> delegateResponse) {
 
         if (delegateResponse.value == null) {
             delegateResponse.value = delegateFactory.createResponse();
         }
+        String serviceUuid = "";
 
         if (!HetuUtils.isHetuValid(personId)) {
             delegateResponse.value.setExceptionMessage(
                     delegateFactory.createResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
                             new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
-            LOG.error("Got invalid handleDelegate request: " + INVALID_HETU_MSG + " " + personId);
-            return;
+            return serviceUuid;
         }
 
         origEndUserToRequestContext(endUserId);
@@ -105,6 +105,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
 
             if (delegate != null) {
                 Principal principal = delegateFactory.createPrincipal();
+                serviceUuid = delegate.getServiceUuid();
 
                 List<PrincipalType> principals = principal.getPrincipal();
                 for (fi.vm.kapa.rova.engine.model.hpa.Principal modelP : delegate.getPrincipal()) {
@@ -149,21 +150,23 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             LOG.error(message);
         }
 
+        return serviceUuid;
     }
 
     @Override
-    public void handleAuthorization(String delegateId, String principalId, List<String> issues, String service, String endUserId, String requestId,
+    public String handleAuthorization(String delegateId, String principalId, List<String> issues, String service, String endUserId, String requestId,
             Holder<RovaAuthorizationResponse> authorizationResponse) {
 
         authorizationResponse.value = authorizationFactory.createRovaAuthorizationResponse();
         authorizationResponse.value.setAuthorization(AuthorizationType.DISALLOWED);
+        String serviceUuid = "";
 
         if (!HetuUtils.isHetuValid(delegateId) || !HetuUtils.isHetuValid(principalId)) {
             authorizationResponse.value.setExceptionMessage(authorizationFactory
                     .createRovaAuthorizationResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
                             new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
             LOG.error("Got invalid handleAuthorization request: " + INVALID_HETU_MSG + " " + delegateId + "/" + principalId);
-            return;
+            return serviceUuid;
         }
 
         Set<String> issueSet = (issues != null) ? new HashSet<>(issues) : null;
@@ -176,6 +179,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         try {
 
             if (auth != null) {
+                serviceUuid = auth.getServiceUuid();
 
                 authorizationResponse.value.setAuthorization(AuthorizationType.fromValue(auth.getResult().toString()));
 
@@ -207,12 +211,15 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                     .setExceptionMessage(authorizationFactory.createRovaAuthorizationResponseExceptionMessage(message));
             LOG.error(message);
         }
+
+        return serviceUuid;
     }
 
     @Override
-    public void handleOrganizationalRoles(String personId, List<String> organizationIds, String service, String endUserId, String requestId,
+    public String handleOrganizationalRoles(String personId, List<String> organizationIds, String service, String endUserId, String requestId,
             Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> rolesResponseHolder) {
         rolesResponseHolder.value = organizationalRolesFactory.createResponse();
+        String serviceUuid = "";
         boolean complete = true;
 
         if (!HetuUtils.isHetuValid(personId)) {
@@ -220,7 +227,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
                     organizationalRolesFactory.createResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
                             new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
             LOG.error("Got invalid handleOrganizationalRoles request: " + INVALID_HETU_MSG + " " + personId);
-            return;
+            return serviceUuid;
         }
 
         origEndUserToRequestContext(endUserId);
@@ -229,11 +236,12 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         List<OrganizationResult> roles = null;
 
         try {
+
             YpaResult ypaResult = ypaClient.getRoles(personId, ServiceIdType.XROAD.toString(), service, organizationIds);
-            roles = ypaResult.getOrganizationResults();
 
-            if (roles != null) {
+            if (ypaResult != null && (roles = ypaResult.getOrganizationResults()) != null) {
 
+                serviceUuid = ypaResult.getServiceUuid();
                 OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
                 List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
 
@@ -278,6 +286,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory.createResponseExceptionMessage(message));
             LOG.error(message);
         }
+
+        return serviceUuid;
     }
 
     private String createExceptionMessage(ResponseEntity<?> response) {

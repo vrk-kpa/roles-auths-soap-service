@@ -23,15 +23,19 @@
 package fi.vm.kapa.rova.soap;
 
 import fi.vm.kapa.rova.logging.Logger;
+import fi.vm.kapa.rova.soap.providers.EngineDataProvider;
 import fi.vm.kapa.xml.rova.api.authorization.*;
 import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
+import javax.xml.bind.JAXBElement;
 import javax.xml.ws.Holder;
 import java.util.Iterator;
 
 import static fi.vm.kapa.rova.logging.Logger.Field.*;
 import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationPortType")
 @Component("rovaAuthorizationService")
@@ -45,11 +49,11 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
         LOG.info("Authorization request received");
         long startTime = System.currentTimeMillis();
 
-        dataProvider.handleAuthorization(request.value.getDelegateIdentifier(),
+        String serviceUuid = dataProvider.handleAuthorization(request.value.getDelegateIdentifier(),
                 request.value.getPrincipalIdentifier(), request.value.getIssue(), getService(),
                 getEndUserId(), getRequestId(), response);
 
-        logAuthorizationRequest(request, response, startTime, System.currentTimeMillis());
+        logAuthorizationRequest(request, response, serviceUuid, startTime, System.currentTimeMillis());
     }
 
     private String getEndUserId() {
@@ -70,16 +74,32 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
     }
 
     private void logAuthorizationRequest(Holder<Request> request,
-            Holder<RovaAuthorizationResponse> response, long startTime, long endTime) {
+            Holder<RovaAuthorizationResponse> response, String serviceUuid, long startTime, long endTime) {
 
         Logger.LogMap logMap = LOG.infoMap();
-        
+
         logMap.add(END_USER, getEndUserId());
         logMap.add(SERVICE_ID, getService());
+        logMap.add(SERVICE_UUID, serviceUuid);
         logMap.add(SERVICE_REQUEST_IDENTIFIER, getRequestId());
         logMap.add(DURATION, Long.toString(endTime - startTime));
-        
+
         if (response.value != null) {
+            JAXBElement<String> expMsgElement = response.value.getExceptionMessage();
+            String expMsg;
+            if (expMsgElement != null && isNotBlank(expMsg = expMsgElement.getValue())) {
+                if (expMsg.contains(EngineDataProvider.INVALID_HETU_MSG)) {
+                    expMsg = new StringBuilder(expMsg)
+                            .append(" ")
+                            .append(request.value.getDelegateIdentifier())
+                            .append("/")
+                            .append(request.value.getPrincipalIdentifier())
+                            .toString();
+                }
+                logMap.add(ERRORSTR, expMsg);
+                logMap.level(ERROR);
+            }
+
             String auth = response.value.getAuthorization() != null
                     ? response.value.getAuthorization().toString()
                     : "NA";
@@ -96,9 +116,9 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
                 }
                 logMap.add(REASONS, rb.toString());
             }
-            
         } else {
             logMap.add(RESULT, "no_valid_response");
+            logMap.add(ERRORSTR, "Creating response.value failed");
             logMap.level(ERROR);
         }
 

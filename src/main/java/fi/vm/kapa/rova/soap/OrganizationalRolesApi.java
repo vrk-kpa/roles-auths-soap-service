@@ -23,6 +23,7 @@
 package fi.vm.kapa.rova.soap;
 
 import fi.vm.kapa.rova.logging.Logger;
+import fi.vm.kapa.rova.soap.providers.EngineDataProvider;
 import fi.vm.kapa.xml.rova.api.orgroles.*;
 import org.springframework.stereotype.Component;
 
@@ -49,12 +50,12 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
 
         long startTime = System.currentTimeMillis();
 
-        dataProvider.handleOrganizationalRoles(request.value.getDelegateIdentifier(),
+        String serviceUuid = dataProvider.handleOrganizationalRoles(request.value.getDelegateIdentifier(),
                 request.value.getOrganizationIdentifier(),
                 getService(), getEndUserId(),
                 getRequestId(), response);
 
-        logRolesRequest(request, response, startTime, System.currentTimeMillis());
+        logRolesRequest(request, response, serviceUuid, startTime, System.currentTimeMillis());
     }
 
     private String getEndUserId() {
@@ -74,19 +75,27 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
     }
 
     private void logRolesRequest(Holder<Request> request,
-            Holder<Response> response, long startTime, long endTime) {
+            Holder<Response> response, String serviceUuid, long startTime, long endTime) {
 
         Logger.LogMap logMap = LOG.infoMap();
 
         logMap.add(END_USER, getEndUserId());
         logMap.add(SERVICE_ID, getService());
+        logMap.add(SERVICE_UUID, serviceUuid);
         logMap.add(SERVICE_REQUEST_IDENTIFIER, getRequestId());
         logMap.add(DURATION, Long.toString(endTime - startTime));
 
         if (response.value != null) {
             JAXBElement<String> expMsgElement = response.value.getExceptionMessage();
-            if (expMsgElement != null && isNotBlank(expMsgElement.getValue())) {
-                logMap.add(ERRORSTR, expMsgElement.getValue());
+            String expMsg;
+            if (expMsgElement != null && isNotBlank(expMsg = expMsgElement.getValue())) {
+                if (expMsg.contains(EngineDataProvider.INVALID_HETU_MSG)) {
+                    expMsg = new StringBuilder(expMsg)
+                            .append(" ")
+                            .append(request.value.getDelegateIdentifier())
+                            .toString();
+                }
+                logMap.add(ERRORSTR, expMsg);
                 logMap.level(ERROR);
             }
 
@@ -99,8 +108,10 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
             }
         } else {
             logMap.add(RESULT, "no_valid_response");
+            logMap.add(ERRORSTR, "Creating response.value failed");
             logMap.level(ERROR);
         }
+
         logMap.log();
     }
 
