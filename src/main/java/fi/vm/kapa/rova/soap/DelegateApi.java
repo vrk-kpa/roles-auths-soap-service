@@ -33,7 +33,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.ws.Holder;
 
 import org.springframework.stereotype.Component;
-
+import fi.vm.kapa.rova.engine.Hpa;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.soap.providers.EngineDataProvider;
 import fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType;
@@ -84,6 +84,7 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
         Logger.LogMap logMap = LOG.infoMap();
 
         logMap.add(END_USER, getEndUserId());
+        logMap.add(ACTION, Hpa.ACTION_DELEGATE);
         logMap.add(SERVICE_ID, getService());
         logMap.add(SERVICE_UUID, serviceUuid);
         logMap.add(SERVICE_REQUEST_IDENTIFIER, getRequestId());

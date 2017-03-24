@@ -22,6 +22,7 @@
  */
 package fi.vm.kapa.rova.soap;
 
+import fi.vm.kapa.rova.engine.Hpa;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.soap.providers.EngineDataProvider;
 import fi.vm.kapa.xml.rova.api.authorization.*;
@@ -40,8 +41,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationPortType")
 @Component("rovaAuthorizationService")
 public class AuthorizationApi extends AbstractSoapService implements RovaAuthorizationPortType {
-    private static final Logger LOG = Logger.getLogger(AuthorizationApi.class);
-    
+    private final Logger LOG = Logger.getLogger(AuthorizationApi.class);
+
     private ObjectFactory factory = new ObjectFactory();
 
     @Override
@@ -79,6 +80,7 @@ public class AuthorizationApi extends AbstractSoapService implements RovaAuthori
         Logger.LogMap logMap = LOG.infoMap();
 
         logMap.add(END_USER, getEndUserId());
+        logMap.add(ACTION, Hpa.ACTION_AUTHORIZATION);
         logMap.add(SERVICE_ID, getService());
         logMap.add(SERVICE_UUID, serviceUuid);
         logMap.add(SERVICE_REQUEST_IDENTIFIER, getRequestId());

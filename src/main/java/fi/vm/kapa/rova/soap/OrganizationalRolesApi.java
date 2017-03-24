@@ -22,6 +22,7 @@
  */
 package fi.vm.kapa.rova.soap;
 
+import fi.vm.kapa.rova.engine.Ypa;
 import fi.vm.kapa.rova.logging.Logger;
 import fi.vm.kapa.rova.soap.providers.EngineDataProvider;
 import fi.vm.kapa.xml.rova.api.orgroles.*;
@@ -40,9 +41,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Component("rovaOrganizationalRolesService")
 public class OrganizationalRolesApi extends AbstractSoapService implements RovaOrganizationalRolesPortType {
 
-    Logger LOG = Logger.getLogger(OrganizationalRolesApi.class);
+    private Logger LOG = Logger.getLogger(OrganizationalRolesApi.class);
 
-    ObjectFactory factory = new ObjectFactory();
+    private ObjectFactory factory = new ObjectFactory();
 
     @Override
     public void rovaOrganizationalRolesService(Holder<Request> request, Holder<Response> response) {
@@ -80,6 +81,13 @@ public class OrganizationalRolesApi extends AbstractSoapService implements RovaO
         Logger.LogMap logMap = LOG.infoMap();
 
         logMap.add(END_USER, getEndUserId());
+
+        boolean organizationIdsPresent = false;
+        if (request.value != null && request.value.getOrganizationIdentifier() != null) {
+            organizationIdsPresent = !request.value.getOrganizationIdentifier().isEmpty();
+        }
+        logMap.add(ACTION, organizationIdsPresent ? Ypa.ACTION_ROLES_BY_ID : Ypa.ACTION_ROLES);
+
         logMap.add(SERVICE_ID, getService());
         logMap.add(SERVICE_UUID, serviceUuid);
         logMap.add(SERVICE_REQUEST_IDENTIFIER, getRequestId());

@@ -65,10 +65,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Component
 public class EngineDataProvider implements DataProvider, SpringProperties {
 
-    private static final String INCOMPLETE = "incomplete";
+    public static final String INCOMPLETE = "incomplete";
     public static final String INVALID_HETU_MSG = "Invalid hetu.";
 
-    Logger LOG = Logger.getLogger(EngineDataProvider.class);
+    private Logger LOG = Logger.getLogger(EngineDataProvider.class);
 
     private fi.vm.kapa.xml.rova.api.authorization.ObjectFactory authorizationFactory = new fi.vm.kapa.xml.rova.api.authorization.ObjectFactory();
     private fi.vm.kapa.xml.rova.api.delegate.ObjectFactory delegateFactory = new fi.vm.kapa.xml.rova.api.delegate.ObjectFactory();
