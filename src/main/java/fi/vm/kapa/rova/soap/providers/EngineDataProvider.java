@@ -32,6 +32,7 @@ import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
 import fi.vm.kapa.rova.external.model.IResultType;
 import fi.vm.kapa.rova.external.model.ServiceIdType;
 import fi.vm.kapa.rova.logging.Logger;
+import fi.vm.kapa.rova.rest.exception.HttpStatusException;
 import fi.vm.kapa.rova.rest.identification.RequestIdentificationInterceptor;
 import fi.vm.kapa.rova.utils.HetuUtils;
 import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
@@ -48,6 +49,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -96,51 +98,66 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         origEndUserToRequestContext(endUserId);
         origRequestIdToRequestContext(requestId);
 
-        ResponseEntity<HpaDelegate> response = hpaClient.getDelegate(ServiceIdType.XROAD.toString(), personId, service);
+        try {
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            HpaDelegate delegate = response.getBody();
-            Principal principal = delegateFactory.createPrincipal();
+            HpaDelegate delegate = hpaClient.getDelegate(ServiceIdType.XROAD.toString(), personId, service);
 
-            List<PrincipalType> principals = principal.getPrincipal();
-            for (fi.vm.kapa.rova.engine.model.hpa.Principal modelP : delegate.getPrincipal()) {
-                PrincipalType current = delegateFactory.createPrincipalType();
-                current.setIdentifier(modelP.getPersonId());
-                current.setName(modelP.getName());
-                principals.add(current);
-            }
-            delegateResponse.value.setPrincipalList(principal);
+            if (delegate != null) {
+                Principal principal = delegateFactory.createPrincipal();
 
-            List<DecisionReason> reasons = delegate.getReasons();
-            if (reasons != null) {
-                List<fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType> reason = delegateResponse.value.getReason();
-                for (DecisionReason dr : reasons) {
-                    fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType drt = new fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType();
-                    drt.setRule(dr.getReasonRule());
-                    drt.setValue(dr.getReasonValue());
-                    reason.add(drt);
+                List<PrincipalType> principals = principal.getPrincipal();
+                for (fi.vm.kapa.rova.engine.model.hpa.Principal modelP : delegate.getPrincipal()) {
+                    PrincipalType current = delegateFactory.createPrincipalType();
+                    current.setIdentifier(modelP.getPersonId());
+                    current.setName(modelP.getName());
+                    principals.add(current);
                 }
+                delegateResponse.value.setPrincipalList(principal);
+
+                List<DecisionReason> reasons = delegate.getReasons();
+                if (reasons != null) {
+                    List<fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType> reason = delegateResponse.value.getReason();
+                    for (DecisionReason dr : reasons) {
+                        fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType drt = new fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType();
+                        drt.setRule(dr.getReasonRule());
+                        drt.setValue(dr.getReasonValue());
+                        reason.add(drt);
+                    }
+                }
+
+                if (delegate.getAuthorizationType() != null &&
+                        delegate.getAuthorizationType() != fi.vm.kapa.rova.external.model.AuthorizationType.UNKNOWN) {
+                    delegateResponse.value.setAuthorization(fi.vm.kapa.xml.rova.api.delegate.AuthorizationType.valueOf(
+                            delegate.getAuthorizationType().toString()));
+                }
+
+            } else {
+                String message = "Got empty delegate response from engine";
+                delegateResponse.value.setExceptionMessage(delegateFactory.createResponseExceptionMessage(message));
+                LOG.error(message);
             }
 
-            if (delegate.getAuthorizationType() != null &&
-                    delegate.getAuthorizationType() != fi.vm.kapa.rova.external.model.AuthorizationType.UNKNOWN) {
-                delegateResponse.value.setAuthorization(fi.vm.kapa.xml.rova.api.delegate.AuthorizationType.valueOf(
-                        delegate.getAuthorizationType().toString()));
-            }
-        } else {
-            delegateResponse.value.setExceptionMessage(delegateFactory.createResponseExceptionMessage(createExceptionMessage(response)));
-            LOG.error("Got error response from engine: " + response.getStatusCodeValue());
+        } catch (RestClientException e) {
+            Throwable reason = e.getRootCause();
+            String message = "Got error response from engine: " + ((reason != null && (reason instanceof HttpStatusException)) ? reason : e);
+            delegateResponse.value.setExceptionMessage(delegateFactory.createResponseExceptionMessage(message));
+            LOG.error(message);
+        } catch (Exception e) {
+            String message = "Error occurred: " + e.getMessage();
+            delegateResponse.value.setExceptionMessage(delegateFactory.createResponseExceptionMessage(message));
+            LOG.error(message);
         }
+
     }
 
     @Override
     public void handleAuthorization(String delegateId, String principalId, List<String> issues, String service, String endUserId, String requestId,
-            Holder<RovaAuthorizationResponse> authorizationResponseHolder) {
+            Holder<RovaAuthorizationResponse> authorizationResponse) {
 
-        authorizationResponseHolder.value = authorizationFactory.createRovaAuthorizationResponse();
+        authorizationResponse.value = authorizationFactory.createRovaAuthorizationResponse();
 
         if (!HetuUtils.isHetuValid(delegateId) || !HetuUtils.isHetuValid(principalId)) {
-            authorizationResponseHolder.value.setExceptionMessage(authorizationFactory
+            authorizationResponse.value.setExceptionMessage(authorizationFactory
                     .createRovaAuthorizationResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
                             new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
             LOG.error("Got invalid handleAuthorization request: " + INVALID_HETU_MSG + " " + delegateId + "/" + principalId);
@@ -152,25 +169,41 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         origEndUserToRequestContext(endUserId);
         origRequestIdToRequestContext(requestId);
 
-        ResponseEntity<Authorization> response = hpaClient.getAuthorization(ServiceIdType.XROAD.toString(), service, delegateId, principalId, issueSet);
+        Authorization auth = hpaClient.getAuthorization(ServiceIdType.XROAD.toString(), service, delegateId, principalId, issueSet);
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            Authorization auth = response.getBody();
+        try {
 
-            authorizationResponseHolder.value.setAuthorization(AuthorizationType.fromValue(auth.getResult().toString()));
+            if (auth != null) {
 
-            if (auth.getReasons() != null) {
-                for (DecisionReason dr : auth.getReasons()) {
-                    DecisionReasonType drt = new DecisionReasonType();
-                    drt.setRule(dr.getReasonRule());
-                    drt.setValue(dr.getReasonValue());
-                    authorizationResponseHolder.value.getReason().add(drt);
+                authorizationResponse.value.setAuthorization(AuthorizationType.fromValue(auth.getResult().toString()));
+
+                if (auth.getReasons() != null) {
+                    for (DecisionReason dr : auth.getReasons()) {
+                        DecisionReasonType drt = new DecisionReasonType();
+                        drt.setRule(dr.getReasonRule());
+                        drt.setValue(dr.getReasonValue());
+                        authorizationResponse.value.getReason().add(drt);
+                    }
                 }
+
+            } else {
+                String message = "Got empty authorization response from engine";
+                authorizationResponse.value
+                        .setExceptionMessage(authorizationFactory.createRovaAuthorizationResponseExceptionMessage(message));
+                LOG.error(message);
             }
-        } else {
-            authorizationResponseHolder.value
-                    .setExceptionMessage(authorizationFactory.createRovaAuthorizationResponseExceptionMessage(createExceptionMessage(response)));
-            LOG.error("Got error response from engine: " + response.getStatusCodeValue());
+
+        } catch (RestClientException e) {
+            Throwable reason = e.getRootCause();
+            String message = "Got error response from engine: " + ((reason != null && (reason instanceof HttpStatusException)) ? reason : e);
+            authorizationResponse.value
+                    .setExceptionMessage(authorizationFactory.createRovaAuthorizationResponseExceptionMessage(message));
+            LOG.error(message);
+        } catch (Exception e) {
+            String message = "Error occurred: " + e.getMessage();
+            authorizationResponse.value
+                    .setExceptionMessage(authorizationFactory.createRovaAuthorizationResponseExceptionMessage(message));
+            LOG.error(message);
         }
     }
 
@@ -191,42 +224,57 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         origEndUserToRequestContext(endUserId);
         origRequestIdToRequestContext(requestId);
 
-        ResponseEntity<List<OrganizationResult>> response = ypaClient.getRoles(personId, ServiceIdType.XROAD.toString(), service, organizationIds);
+        List<OrganizationResult> roles = null;
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            List<OrganizationResult> roles = response.getBody();
+        try {
 
-            OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
-            List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
+            roles = ypaClient.getRoles(personId, ServiceIdType.XROAD.toString(), service, organizationIds);
 
-            for (OrganizationResult organizationResult : roles) {
-                OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType();
+            if (roles != null) {
 
-                if (!organizationResult.isComplete()) {
-                    complete = false;
+                OrganizationListType organizationListType = organizationalRolesFactory.createOrganizationListType();
+                List<OrganizationalRolesType> organizationalRoles = organizationListType.getOrganization();
+
+                for (OrganizationResult organizationResult : roles) {
+                    OrganizationalRolesType ort = organizationalRolesFactory.createOrganizationalRolesType();
+
+                    if (!organizationResult.isComplete()) {
+                        complete = false;
+                    }
+
+                    ort.setName(organizationResult.getName());
+                    ort.setOrganizationIdentifier(organizationResult.getIdentifier());
+                    RoleList roleList = organizationalRolesFactory.createRoleList();
+                    for (IResultType rt : organizationResult.getRoles()) {
+                        roleList.getRole().add(rt.getResult());
+                    }
+                    ort.setRoles(roleList);
+
+                    organizationalRoles.add(ort);
                 }
 
-                ort.setName(organizationResult.getName());
-                ort.setOrganizationIdentifier(organizationResult.getIdentifier());
-                RoleList roleList = organizationalRolesFactory.createRoleList();
-                for (IResultType rt : organizationResult.getRoles()) {
-                    roleList.getRole().add(rt.getResult());
+                rolesResponseHolder.value.setOrganizationList(organizationListType);
+
+                if (!complete) {
+                    rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory.createResponseExceptionMessage(INCOMPLETE));
+                    LOG.info("Result is not complete");
                 }
-                ort.setRoles(roleList);
 
-                organizationalRoles.add(ort);
+            } else {
+                String message = "Got empty roles response from engine";
+                rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory.createResponseExceptionMessage(message));
+                LOG.error(message);
             }
 
-            rolesResponseHolder.value.setOrganizationList(organizationListType);
-
-            if (!complete) {
-                rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory.createResponseExceptionMessage(INCOMPLETE));
-                LOG.info("Result is not complete");
-            }
-
-        } else {
-            rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory.createResponseExceptionMessage(createExceptionMessage(response)));
-            LOG.error("Got error response from engine: " + response.getStatusCodeValue());
+        } catch (RestClientException e) {
+            Throwable reason = e.getRootCause();
+            String message = "Got error response from engine: " + ((reason != null && (reason instanceof HttpStatusException)) ? reason : e);
+            rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory.createResponseExceptionMessage(message));
+            LOG.error(message);
+        } catch (Exception e) {
+            String message = "Error occurred: " + e.getMessage();
+            rolesResponseHolder.value.setExceptionMessage(organizationalRolesFactory.createResponseExceptionMessage(message));
+            LOG.error(message);
         }
     }
 
