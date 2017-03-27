@@ -67,7 +67,7 @@ public class EngineDataProviderTest {
         EngineDataProvider provider = new EngineDataProvider();
         HpaClient hpaClient = EasyMock.createMock(HpaClient.class);
         EasyMock.expect(hpaClient.getDelegate(anyString(), anyString(), anyString()))
-                .andReturn(getInvocationResponse(getHpaDelegate())).once();
+                .andReturn(getHpaDelegate()).once();
         EasyMock.replay(hpaClient);
         provider.setHpaClient(hpaClient);
 
@@ -83,7 +83,7 @@ public class EngineDataProviderTest {
         EngineDataProvider provider = new EngineDataProvider();
         HpaClient hpaClient = EasyMock.createMock(HpaClient.class);
         EasyMock.expect(hpaClient.getAuthorization(anyString(), anyString(), anyString(), anyString(), anyObject()))
-                .andReturn(getInvocationResponse(getAuthorization())).once();
+                .andReturn(getAuthorization()).once();
         EasyMock.replay(hpaClient);
         provider.setHpaClient(hpaClient);
 
@@ -94,13 +94,6 @@ public class EngineDataProviderTest {
                 SERVICE_IDENTIFIER, END_USER, REQUEST_ID, responseHolder);
         EasyMock.verify(hpaClient);
         Assert.assertNotNull(responseHolder.value);
-    }
-
-    private <T> ResponseEntity<T> getInvocationResponse(T object) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setDate(new Date().getTime());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return ResponseEntity.ok(object);
     }
 
     private HpaDelegate getHpaDelegate() {
