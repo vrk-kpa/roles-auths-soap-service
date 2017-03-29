@@ -155,6 +155,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             Holder<RovaAuthorizationResponse> authorizationResponse) {
 
         authorizationResponse.value = authorizationFactory.createRovaAuthorizationResponse();
+        authorizationResponse.value.setAuthorization(AuthorizationType.DISALLOWED);
 
         if (!HetuUtils.isHetuValid(delegateId) || !HetuUtils.isHetuValid(principalId)) {
             authorizationResponse.value.setExceptionMessage(authorizationFactory
