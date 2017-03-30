@@ -117,6 +117,11 @@ public class EngineDataProviderTest {
             public List<DecisionReason> getReasons() {
                 return new ArrayList<>();
             }
+
+            @Override
+            public String getServiceUuid() {
+                return "TEST-SERVICE-UUID";
+            }
         };
     }
 

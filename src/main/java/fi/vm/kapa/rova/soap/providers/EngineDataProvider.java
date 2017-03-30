@@ -29,6 +29,7 @@ import fi.vm.kapa.rova.engine.model.hpa.Authorization;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
 import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
+import fi.vm.kapa.rova.engine.model.ypa.YpaResult;
 import fi.vm.kapa.rova.external.model.IResultType;
 import fi.vm.kapa.rova.external.model.ServiceIdType;
 import fi.vm.kapa.rova.logging.Logger;
@@ -228,8 +229,8 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         List<OrganizationResult> roles = null;
 
         try {
-
-            roles = ypaClient.getRoles(personId, ServiceIdType.XROAD.toString(), service, organizationIds);
+            YpaResult ypaResult = ypaClient.getRoles(personId, ServiceIdType.XROAD.toString(), service, organizationIds);
+            roles = ypaResult.getOrganizationResults();
 
             if (roles != null) {
 
