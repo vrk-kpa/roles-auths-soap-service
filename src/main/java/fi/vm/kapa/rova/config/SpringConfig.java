@@ -33,7 +33,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @Configuration
 @ImportResource("applicationContext.xml")
 @PropertySources(value = {
-    @PropertySource("classpath:application.properties"),
+    @PropertySource("classpath:application.yml"),
     @PropertySource(value = "file:/opt/rova/roles-auths-soap-service/config/service.properties", ignoreResourceNotFound = true)})
 public class SpringConfig extends BaseSpringConfig {
 

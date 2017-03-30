@@ -1,0 +1,27 @@
+service:
+  name: roles-auths-soap-service
+spring:
+  application.name: roles-auths-soap-service
+wsdl_filter_request_path: /rova/wsdl
+wsdl_filter_resource_path: wsdl
+wsdl_filter_request_files: authorization.wsdl,delegate.wsdl,orgroles.wsdl,xroad6identifiers.xsd,xroad6.xsd
+hpa_client_enabled: true
+ypa_client_enabled: true
+
+roles-auths-engine-hpa:
+  ribbon:
+    ServerListRefreshInterval: 60000
+    DeploymentContextBasedVipAddresses: roles-auths-engine
+    eureka:
+      enabled: false
+#    NIWSServerListClassName: com.netflix.niws.loadbalancer.DiscoveryEnabledNIWSServerList
+    NFLoadBalancerRuleClassName: fi.vm.kapa.rova.engine.EngineLoadbalancerRule
+
+roles-auths-engine-ypa:
+  ribbon:
+    ServerListRefreshInterval: 60000
+    DeploymentContextBasedVipAddresses: roles-auths-engine
+    eureka:
+      enabled: false
+#    NIWSServerListClassName: com.netflix.niws.loadbalancer.DiscoveryEnabledNIWSServerList
+    NFLoadBalancerRuleClassName: fi.vm.kapa.rova.engine.EngineLoadbalancerRule
