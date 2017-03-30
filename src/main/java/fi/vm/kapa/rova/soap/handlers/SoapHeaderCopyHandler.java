@@ -22,25 +22,15 @@
  */
 package fi.vm.kapa.rova.soap.handlers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import fi.vm.kapa.rova.logging.Logger;
+import org.springframework.stereotype.Component;
 
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPEnvelope;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.*;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-
-import org.springframework.stereotype.Component;
-
-import fi.vm.kapa.rova.logging.Logger;
+import java.util.*;
 
 @Component("xroadHeaderHandler")
 public class SoapHeaderCopyHandler implements SOAPHandler<SOAPMessageContext> {

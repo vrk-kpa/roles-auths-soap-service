@@ -25,7 +25,6 @@ package fi.vm.kapa.rova.soap.providers;
 import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.HpaClient;
 import fi.vm.kapa.rova.engine.YpaClient;
-import fi.vm.kapa.rova.engine.model.hpa.Authorization;
 import fi.vm.kapa.rova.engine.model.hpa.AuthorizationInternal;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
 import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
@@ -52,7 +51,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.ws.rs.core.Response.Status;
 import javax.xml.ws.Holder;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;

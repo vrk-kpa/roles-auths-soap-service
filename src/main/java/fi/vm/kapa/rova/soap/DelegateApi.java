@@ -22,25 +22,20 @@
  */
 package fi.vm.kapa.rova.soap;
 
-import static fi.vm.kapa.rova.logging.Logger.Field.*;
-import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.Iterator;
+import fi.vm.kapa.rova.engine.Hpa;
+import fi.vm.kapa.rova.logging.Logger;
+import fi.vm.kapa.rova.soap.providers.EngineDataProvider;
+import fi.vm.kapa.xml.rova.api.delegate.*;
+import org.springframework.stereotype.Component;
 
 import javax.jws.WebService;
 import javax.xml.bind.JAXBElement;
 import javax.xml.ws.Holder;
+import java.util.Iterator;
 
-import org.springframework.stereotype.Component;
-import fi.vm.kapa.rova.engine.Hpa;
-import fi.vm.kapa.rova.logging.Logger;
-import fi.vm.kapa.rova.soap.providers.EngineDataProvider;
-import fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType;
-import fi.vm.kapa.xml.rova.api.delegate.ObjectFactory;
-import fi.vm.kapa.xml.rova.api.delegate.Request;
-import fi.vm.kapa.xml.rova.api.delegate.Response;
-import fi.vm.kapa.xml.rova.api.delegate.RovaDelegatePortType;
+import static fi.vm.kapa.rova.logging.Logger.Field.*;
+import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.delegate.RovaDelegatePortType")
 @Component("rovaDelegateService")

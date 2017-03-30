@@ -22,8 +22,11 @@
  */
 package fi.vm.kapa.rova.soap.handlers;
 
-import java.util.Optional;
-import java.util.Set;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.developer.JAXWSProperties;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
@@ -34,13 +37,8 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 import javax.xml.ws.soap.SOAPFaultException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.developer.JAXWSProperties;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Raises a SOAP fault if the xro:userId header element doesn't exist or is empty.

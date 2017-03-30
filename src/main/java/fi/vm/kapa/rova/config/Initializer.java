@@ -22,13 +22,10 @@
  */
 package fi.vm.kapa.rova.config;
 
-import java.lang.reflect.Field;
-import java.util.EnumSet;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
+import com.sun.xml.ws.transport.http.servlet.WSServletDelegate;
+import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
+import fi.vm.kapa.rova.logging.LogbackConfigurator;
+import fi.vm.kapa.rova.logging.MDCFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
@@ -36,11 +33,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
-import com.sun.xml.ws.transport.http.servlet.WSServletDelegate;
-import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
-
-import fi.vm.kapa.rova.logging.LogbackConfigurator;
-import fi.vm.kapa.rova.logging.MDCFilter;
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import java.lang.reflect.Field;
+import java.util.EnumSet;
 
 @Configuration
 @ImportResource("applicationContext.xml")

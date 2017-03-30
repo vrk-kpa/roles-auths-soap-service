@@ -22,12 +22,11 @@
  */
 package fi.vm.kapa.rova.soap.providers;
 
-import java.util.List;
-
-import javax.xml.ws.Holder;
-
 import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
 import fi.vm.kapa.xml.rova.api.delegate.Response;
+
+import javax.xml.ws.Holder;
+import java.util.List;
 
 
 public interface DataProvider {

@@ -33,7 +33,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.xml.ws.Holder;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
