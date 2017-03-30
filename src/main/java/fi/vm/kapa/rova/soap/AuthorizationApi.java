@@ -35,7 +35,6 @@ import java.util.Iterator;
 
 import static fi.vm.kapa.rova.logging.Logger.Field.*;
 import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationPortType")
