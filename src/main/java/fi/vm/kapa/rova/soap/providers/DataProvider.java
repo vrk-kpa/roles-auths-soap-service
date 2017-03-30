@@ -32,7 +32,7 @@ import fi.vm.kapa.xml.rova.api.delegate.Response;
 
 public interface DataProvider {
 
-    void handleAuthorization(
+    String handleAuthorization(
             String delegateId,
             String principalId,
             List<String> issues,
@@ -41,11 +41,11 @@ public interface DataProvider {
             String requestId,
             Holder<RovaAuthorizationResponse> response);
 
-    void handleDelegate(String personId, String service,
+    String handleDelegate(String personId, String service,
             String endUserId, String requestId,
             Holder<Response> response);
     
-    void handleOrganizationalRoles(String personId, List<String> organizationIds, String service,
+    String handleOrganizationalRoles(String personId, List<String> organizationIds, String service,
                                    String endUserId, String requestId,
                                    Holder<fi.vm.kapa.xml.rova.api.orgroles.Response> response);
     

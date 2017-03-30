@@ -24,15 +24,18 @@ package fi.vm.kapa.rova.soap;
 
 import static fi.vm.kapa.rova.logging.Logger.Field.*;
 import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Iterator;
 
 import javax.jws.WebService;
+import javax.xml.bind.JAXBElement;
 import javax.xml.ws.Holder;
 
 import org.springframework.stereotype.Component;
-
+import fi.vm.kapa.rova.engine.Hpa;
 import fi.vm.kapa.rova.logging.Logger;
+import fi.vm.kapa.rova.soap.providers.EngineDataProvider;
 import fi.vm.kapa.xml.rova.api.delegate.DecisionReasonType;
 import fi.vm.kapa.xml.rova.api.delegate.ObjectFactory;
 import fi.vm.kapa.xml.rova.api.delegate.Request;
@@ -53,10 +56,10 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
 
         long startTime = System.currentTimeMillis();
 
-        dataProvider.handleDelegate(request.value.getDelegateIdentifier(),
+        String serviceUuid = dataProvider.handleDelegate(request.value.getDelegateIdentifier(),
                 getService(), getEndUserId(), getRequestId(), response);
 
-        logDelegateRequest(request, response, startTime, System.currentTimeMillis());
+        logDelegateRequest(request, response, serviceUuid, startTime, System.currentTimeMillis());
     }
 
     private String getEndUserId() {
@@ -76,24 +79,39 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
     }
 
     private void logDelegateRequest(Holder<Request> request,
-            Holder<Response> response, long startTime, long endTime) {
+            Holder<Response> response, String serviceUuid, long startTime, long endTime) {
 
         Logger.LogMap logMap = LOG.infoMap();
-        
+
         logMap.add(END_USER, getEndUserId());
+        logMap.add(ACTION, Hpa.ACTION_DELEGATE);
         logMap.add(SERVICE_ID, getService());
+        logMap.add(SERVICE_UUID, serviceUuid);
         logMap.add(SERVICE_REQUEST_IDENTIFIER, getRequestId());
         logMap.add(DURATION, Long.toString(endTime - startTime));
-        
+
         if (response.value != null) {
+            JAXBElement<String> expMsgElement = response.value.getExceptionMessage();
+            String expMsg;
+            if (expMsgElement != null && isNotBlank(expMsg = expMsgElement.getValue())) {
+                if (expMsg.contains(EngineDataProvider.INVALID_HETU_MSG)) {
+                    expMsg = new StringBuilder(expMsg)
+                            .append(" ")
+                            .append(request.value.getDelegateIdentifier())
+                            .toString();
+                }
+                logMap.add(ERRORSTR, expMsg);
+                logMap.level(ERROR);
+            }
+
             logMap.add(RESULT, response.value.getAuthorization() != null ? response.value.getAuthorization().toString() : "null");
-            
+
             if (response.value.getPrincipalList() != null && response.value.getPrincipalList().getPrincipal() != null) {
                 logMap.add(PRINCIPAL_COUNT, response.value.getPrincipalList().getPrincipal().size());
             } else {
                 logMap.add(PRINCIPAL_COUNT, "-1");
             }
-            
+
             if (response.value.getReason() != null) {
                 StringBuilder rb = new StringBuilder();
                 for (Iterator<DecisionReasonType> iter = response.value.getReason().iterator(); iter.hasNext();) {
@@ -105,9 +123,10 @@ public class DelegateApi extends AbstractSoapService implements RovaDelegatePort
                 }
                 logMap.add(REASONS, rb.toString());
             }
-            
+
         } else {
             logMap.add(RESULT, "no_valid_response");
+            logMap.add(ERRORSTR, "Creating response.value failed");
             logMap.level(ERROR);
         }
 
