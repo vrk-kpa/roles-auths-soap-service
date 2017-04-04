@@ -22,30 +22,21 @@
  */
 package fi.vm.kapa.rova.soap.providers;
 
-import fi.vm.kapa.rova.engine.Hpa;
 import fi.vm.kapa.rova.engine.HpaClient;
-import fi.vm.kapa.rova.engine.YpaClient;
-import fi.vm.kapa.rova.engine.model.hpa.*;
+import fi.vm.kapa.rova.engine.model.hpa.AuthorizationInternal;
+import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
+import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
+import fi.vm.kapa.rova.engine.model.hpa.Principal;
 import fi.vm.kapa.rova.external.model.AuthorizationType;
-import fi.vm.kapa.rova.external.model.ServiceIdType;
-import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.boot.actuate.autoconfigure.ShellProperties;
-import org.springframework.http.*;
-import org.springframework.http.HttpHeaders;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Link.Builder;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status.Family;
 import javax.xml.ws.Holder;
-import java.lang.annotation.Annotation;
-import java.net.URI;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.anyString;
