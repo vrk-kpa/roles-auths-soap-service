@@ -25,10 +25,7 @@ package fi.vm.kapa.rova.soap.providers;
 import fi.vm.kapa.rova.engine.Hpa;
 import fi.vm.kapa.rova.engine.HpaClient;
 import fi.vm.kapa.rova.engine.YpaClient;
-import fi.vm.kapa.rova.engine.model.hpa.Authorization;
-import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
-import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
-import fi.vm.kapa.rova.engine.model.hpa.Principal;
+import fi.vm.kapa.rova.engine.model.hpa.*;
 import fi.vm.kapa.rova.external.model.AuthorizationType;
 import fi.vm.kapa.rova.external.model.ServiceIdType;
 import fi.vm.kapa.rova.rest.identification.RequestIdentificationFilter;
@@ -125,8 +122,8 @@ public class EngineDataProviderTest {
         };
     }
 
-    private Authorization getAuthorization() {
-        Authorization auth = new Authorization();
+    private AuthorizationInternal getAuthorization() {
+        AuthorizationInternal auth = new AuthorizationInternal();
         auth.setResult(AuthorizationType.ALLOWED);
         return auth;
     }

@@ -26,6 +26,7 @@ import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.HpaClient;
 import fi.vm.kapa.rova.engine.YpaClient;
 import fi.vm.kapa.rova.engine.model.hpa.Authorization;
+import fi.vm.kapa.rova.engine.model.hpa.AuthorizationInternal;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
 import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
@@ -164,7 +165,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         origEndUserToRequestContext(endUserId);
         origRequestIdToRequestContext(requestId);
 
-        Authorization auth = hpaClient.getAuthorization(ServiceIdType.XROAD.toString(), service, delegateId, principalId, issueSet);
+        AuthorizationInternal auth = hpaClient.getAuthorization(ServiceIdType.XROAD.toString(), service, delegateId, principalId, issueSet);
 
         try {
 
