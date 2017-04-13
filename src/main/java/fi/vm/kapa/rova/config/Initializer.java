@@ -22,6 +22,7 @@
  */
 package fi.vm.kapa.rova.config;
 
+import com.netflix.hystrix.contrib.metrics.eventstream.HystrixMetricsStreamServlet;
 import com.sun.xml.ws.transport.http.servlet.WSServletDelegate;
 import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
 import fi.vm.kapa.rova.logging.LogbackConfigurator;
@@ -29,9 +30,11 @@ import fi.vm.kapa.rova.logging.MDCFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
@@ -48,6 +51,7 @@ public class Initializer extends SpringBootServletInitializer {
     @Autowired
     private LogbackConfigurator logConfigurator;
 
+
     @Bean
     public EmbeddedServletContainerCustomizer embeddedServletContainerCustomizer() {
         return logConfigurator.containerCustomizer();
@@ -58,6 +62,15 @@ public class Initializer extends SpringBootServletInitializer {
         super.onStartup(ctx);
         ctx.addFilter(MDC_FILTER, MDCFilter.class)
                 .addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), false, "/*");
+    }
+
+    @Bean(name = "hystrixRegistrationBean")
+    public ServletRegistrationBean servletRegistrationBean() {
+        ServletRegistrationBean registration = new ServletRegistrationBean(
+                new HystrixMetricsStreamServlet(), "/hystrix.stream");
+        registration.setName("hystrixServlet");
+        registration.setLoadOnStartup(1);
+        return registration;
     }
 
     @Bean
