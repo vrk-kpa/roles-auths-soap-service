@@ -12,5 +12,5 @@ wsdl_filter_request_files={{ wsdl_filter_request_files }}
 eureka.client.enabled=false
 
 engine_api_key={{ engine_api_key }}
-roles-auths-engine-hpa.ribbon.listOfServers={{ rova_engine }}
-roles-auths-engine-ypa.ribbon.listOfServers={{ rova_engine }}
+roles-auths-engine-hpa.ribbon.listOfServers={{ rova_engine }}:8001
+roles-auths-engine-ypa.ribbon.listOfServers={{ rova_engine }}:8001
