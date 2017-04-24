@@ -52,11 +52,6 @@
             <groupId>fi.vm.kapa.rova</groupId>
             <artifactId>roles-auths-engine-api</artifactId>
         </dependency>
-        <!-- vare model -->
-        <dependency>
-            <groupId>fi.vm.kapa.rova</groupId>
-            <artifactId>roles-auths-vare-api</artifactId>
-        </dependency>
         <!-- ws api -->
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
