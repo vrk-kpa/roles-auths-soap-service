@@ -30,3 +30,20 @@ roles-auths-engine-ypa:
       enabled: false
 #    NIWSServerListClassName: com.netflix.niws.loadbalancer.DiscoveryEnabledNIWSServerList
     NFLoadBalancerRuleClassName: fi.vm.kapa.rova.engine.EngineLoadbalancerRule
+
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        enabled: false
+        errorThresholdPercentage: 80
+      execution:
+        timeout:
+          enabled: false
+      fallback:
+        enabled: false
+      isolation:
+        strategy: SEMAPHORE
+        thread:
+          timeoutInMilliseconds: 90000
+
