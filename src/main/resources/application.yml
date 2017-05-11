@@ -40,10 +40,10 @@ hystrix:
       execution:
         timeout:
           enabled: false
+        isolation:
+          strategy: SEMAPHORE
+          thread:
+            timeoutInMilliseconds: 90000
       fallback:
         enabled: false
-      isolation:
-        strategy: SEMAPHORE
-        thread:
-          timeoutInMilliseconds: 90000
 
