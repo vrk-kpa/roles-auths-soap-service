@@ -29,12 +29,11 @@ import fi.vm.kapa.rova.logging.LogbackConfigurator;
 import fi.vm.kapa.rova.logging.MDCFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
-import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.web.servlet.DispatcherServlet;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
@@ -89,7 +88,7 @@ public class Initializer extends SpringBootServletInitializer {
                 try {
                     Field f = WSSpringServlet.class.getDeclaredField("delegate");
                     f.setAccessible(true);
-                    WSServletDelegate delegate = (WSServletDelegate)f.get(this);
+                    WSServletDelegate delegate = (WSServletDelegate) f.get(this);
                     delegate.destroy();
                 } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
                     throw new RuntimeException(e);
