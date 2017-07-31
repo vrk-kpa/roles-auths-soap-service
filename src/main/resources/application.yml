@@ -44,6 +44,8 @@ hystrix:
           strategy: SEMAPHORE
           thread:
             timeoutInMilliseconds: 90000
+          semaphore:
+            maxConcurrentRequests: 100
       fallback:
         enabled: false
 
