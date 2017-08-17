@@ -29,6 +29,16 @@
             </ws:service>
         </wss:service>
     </wss:binding>
+    <wss:binding url="/rova/authorizationList">
+        <wss:service>
+            <ws:service bean="#rovaAuthorizationListService">
+                <ws:handlers>
+                    <ref bean="xroadHeaderHandler" />
+                    <ref bean="verifyXRoadUserIdSoapHandler" />
+                </ws:handlers>
+            </ws:service>
+        </wss:service>
+    </wss:binding>
     <wss:binding url="/rova/OrganizationalRoles">
         <wss:service>
             <ws:service bean="#rovaOrganizationalRolesService">

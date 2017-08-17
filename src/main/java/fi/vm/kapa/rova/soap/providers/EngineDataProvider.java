@@ -26,6 +26,7 @@ import fi.vm.kapa.rova.config.SpringProperties;
 import fi.vm.kapa.rova.engine.HpaClient;
 import fi.vm.kapa.rova.engine.YpaClient;
 import fi.vm.kapa.rova.engine.model.hpa.AuthorizationInternal;
+import fi.vm.kapa.rova.engine.model.hpa.AuthorizationListInternal;
 import fi.vm.kapa.rova.engine.model.hpa.DecisionReason;
 import fi.vm.kapa.rova.engine.model.hpa.HpaDelegate;
 import fi.vm.kapa.rova.engine.model.ypa.OrganizationResult;
@@ -38,6 +39,7 @@ import fi.vm.kapa.rova.utils.HetuUtils;
 import fi.vm.kapa.xml.rova.api.authorization.AuthorizationType;
 import fi.vm.kapa.xml.rova.api.authorization.DecisionReasonType;
 import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
+import fi.vm.kapa.xml.rova.api.authorization.list.RovaAuthorizationListResponse;
 import fi.vm.kapa.xml.rova.api.delegate.Principal;
 import fi.vm.kapa.xml.rova.api.delegate.PrincipalType;
 import fi.vm.kapa.xml.rova.api.orgroles.OrganizationListType;
@@ -64,6 +66,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
     public static final String INVALID_HETU_MSG = "Invalid hetu.";
 
     private fi.vm.kapa.xml.rova.api.authorization.ObjectFactory authorizationFactory = new fi.vm.kapa.xml.rova.api.authorization.ObjectFactory();
+    private fi.vm.kapa.xml.rova.api.authorization.list.ObjectFactory authorizationListFactory = new fi.vm.kapa.xml.rova.api.authorization.list.ObjectFactory();
     private fi.vm.kapa.xml.rova.api.delegate.ObjectFactory delegateFactory = new fi.vm.kapa.xml.rova.api.delegate.ObjectFactory();
     private fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory organizationalRolesFactory = new fi.vm.kapa.xml.rova.api.orgroles.ObjectFactory();
 
@@ -141,6 +144,62 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
         }
 
         return serviceUuid;
+    }
+
+    @Override
+    public String handleAuthorizationList(String delegateId, String principalId, String service, String endUserId, String requestId, Holder<RovaAuthorizationListResponse> authorizationListResponse) {
+        authorizationListResponse.value = authorizationListFactory.createRovaAuthorizationListResponse();
+        authorizationListResponse.value.setRoles(authorizationListFactory.createRoleList());
+        String serviceUuid = "";
+
+        if (!HetuUtils.isHetuValid(delegateId) || !HetuUtils.isHetuValid(principalId)) {
+            authorizationListResponse.value.setExceptionMessage(authorizationFactory
+                    .createRovaAuthorizationResponseExceptionMessage(String.format("RequestId: NO_SESSION, Date: %s, Status: %d, Message: %s",
+                            new SimpleDateFormat("dd.MM.yyyyy hh:mm:ss").format(new Date()), Status.BAD_REQUEST.getStatusCode(), INVALID_HETU_MSG)));
+            return serviceUuid;
+        }
+
+        origEndUserToRequestContext(endUserId);
+        origRequestIdToRequestContext(requestId);
+
+        AuthorizationListInternal auth = hpaClient.getAuthorizationList(ServiceIdType.XROAD.toString(), service, delegateId, principalId);
+
+        try {
+
+            if (auth != null) {
+                serviceUuid = auth.getServiceUuid();
+                if (auth.getRoles() != null) {
+                    authorizationListResponse.value.getRoles().getRoles().addAll(auth.getRoles());
+                }
+
+                if (auth.getReasons() != null) {
+                    for (DecisionReason dr : auth.getReasons()) {
+                        fi.vm.kapa.xml.rova.api.authorization.list.DecisionReasonType drt =
+                                new fi.vm.kapa.xml.rova.api.authorization.list.DecisionReasonType();
+                        drt.setRule(dr.getReasonRule());
+                        drt.setValue(dr.getReasonValue());
+                        authorizationListResponse.value.getReason().add(drt);
+                    }
+                }
+            } else {
+                String message = "Got empty authorization response from engine";
+                authorizationListResponse.value
+                        .setExceptionMessage(authorizationListFactory.createRovaAuthorizationListResponseExceptionMessage(message));
+            }
+
+        } catch (RestClientException e) {
+            Throwable reason = e.getRootCause();
+            String message = "Got error response from engine: " + ((reason != null && (reason instanceof HttpStatusException)) ? reason : e);
+            authorizationListResponse.value
+                    .setExceptionMessage(authorizationListFactory.createRovaAuthorizationListResponseExceptionMessage(message));
+        } catch (Exception e) {
+            String message = "Error occurred: " + e.getMessage();
+            authorizationListResponse.value
+                    .setExceptionMessage(authorizationListFactory.createRovaAuthorizationListResponseExceptionMessage(message));
+        }
+
+        return serviceUuid;
+
     }
 
     @Override

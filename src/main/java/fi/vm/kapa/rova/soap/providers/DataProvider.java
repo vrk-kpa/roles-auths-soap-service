@@ -23,6 +23,7 @@
 package fi.vm.kapa.rova.soap.providers;
 
 import fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationResponse;
+import fi.vm.kapa.xml.rova.api.authorization.list.RovaAuthorizationListResponse;
 import fi.vm.kapa.xml.rova.api.delegate.Response;
 
 import javax.xml.ws.Holder;
@@ -39,6 +40,14 @@ public interface DataProvider {
             String endUserId,
             String requestId,
             Holder<RovaAuthorizationResponse> response);
+
+    String handleAuthorizationList(
+            String delegateId,
+            String principalId,
+            String service,
+            String endUserId,
+            String requestId,
+            Holder<RovaAuthorizationListResponse> response);
 
     String handleDelegate(String personId, String service,
             String endUserId, String requestId,
