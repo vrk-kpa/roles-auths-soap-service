@@ -37,7 +37,7 @@ import static fi.vm.kapa.rova.logging.Logger.Field.*;
 import static fi.vm.kapa.rova.logging.Logger.Level.ERROR;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.authorization.RovaAuthorizationListPortType")
+@WebService(endpointInterface = "fi.vm.kapa.xml.rova.api.authorization.list.RovaAuthorizationListPortType")
 @Component("rovaAuthorizationListService")
 public class AuthorizationListApi extends AbstractSoapService implements RovaAuthorizationListPortType {
     private final Logger LOG = Logger.getLogger(AuthorizationListApi.class);
