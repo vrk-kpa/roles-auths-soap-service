@@ -4,7 +4,7 @@ spring:
   application.name: roles-auths-soap-service
 wsdl_filter_request_path: /rova/wsdl
 wsdl_filter_resource_path: wsdl
-wsdl_filter_request_files: authorization.wsdl,delegate.wsdl,orgroles.wsdl,xroad6identifiers.xsd,xroad6.xsd
+wsdl_filter_request_files: authorization.wsdl,authorizationList.wsdl,delegate.wsdl,orgroles.wsdl,xroad6identifiers.xsd,xroad6.xsd
 hpa_client_enabled: true
 ypa_client_enabled: true
 
