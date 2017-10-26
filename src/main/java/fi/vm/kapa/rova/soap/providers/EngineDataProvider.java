@@ -169,7 +169,7 @@ public class EngineDataProvider implements DataProvider, SpringProperties {
             if (auth != null) {
                 serviceUuid = auth.getServiceUuid();
                 if (auth.getRoles() != null) {
-                    authorizationListResponse.value.getRoles().getRoles().addAll(auth.getRoles());
+                    authorizationListResponse.value.getRoles().getRole().addAll(auth.getRoles());
                 }
 
                 if (auth.getReasons() != null) {
